@@ -201,3 +201,13 @@ body {
   100% { stroke-dasharray: 260.752px, 0; stroke-dashoffset: -260.752px; }
 }
 
+/* ─── Dashboard Card Hover ────────────────────────────────── */
+
+.dashboard-card {
+  transition: all 0.3s ease;
+}
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
