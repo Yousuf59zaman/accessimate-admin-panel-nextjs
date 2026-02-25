@@ -32,7 +32,7 @@ export async function fetchAdmin<T = unknown>(
     processedBody = JSON.stringify(rawBody);
   }
 
-  const url = `${baseURL}${path}`;
+  const url = `${baseURL?.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
 
   try {
     const response = await fetch(url, {

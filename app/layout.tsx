@@ -4,6 +4,7 @@ import "./globals.css";
 import { AdminAuthProvider } from "@/app/contexts/AdminAuthContext";
 import { CitizenAuthProvider } from "@/app/contexts/CitizenAuthContext";
 import { SidebarProvider } from "@/app/contexts/SidebarContext";
+import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,11 +34,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AdminAuthProvider>
-          <CitizenAuthProvider>
-            <SidebarProvider>{children}</SidebarProvider>
-          </CitizenAuthProvider>
-        </AdminAuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          disableTransitionOnChange
+        >
+          <AdminAuthProvider>
+            <CitizenAuthProvider>
+              <SidebarProvider>{children}</SidebarProvider>
+            </CitizenAuthProvider>
+          </AdminAuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

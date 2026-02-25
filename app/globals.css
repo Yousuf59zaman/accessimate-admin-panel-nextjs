@@ -27,3 +27,38 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Admin Sidebar Layout */
+.admin-layout {
+  top: 0;
+  left: 0;
+  background-image: url('/images/effect-onlight.png');
+  background-repeat: no-repeat;
+  transition: width 0.3s ease-in-out;
+}
+
+/* Tree vertical line for children container */
+.tree-vertical-line {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: calc(100% - 0.6rem);
+  background-color: rgb(209 213 219);
+  z-index: 1;
+}
+
+.dark .tree-vertical-line {
+  background-color: rgb(75 85 99);
+}
+
+.menu-item-children {
+  position: relative;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.menu-item {
+  margin-bottom: 0.125rem;
+}
+
