@@ -97,7 +97,7 @@ export default function AdminSidebar() {
 
       {/* Sidebar */}
       <div
-        className={`fixed admin-layout h-full top-0 left-0 flex flex-col transition-all duration-300 ease-in-out transform dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 bg-white dark:text-white z-20 ${
+        className={`fixed bg-[url('/images/effect-onlight.png')] bg-no-repeat h-full top-0 left-0 flex flex-col transition-all duration-300 ease-in-out transform dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 bg-white dark:text-white z-20 ${
           isOpen ? "w-[250px]" : "w-[70px]"
         } ${!isOpen && isMobile ? "-translate-x-full" : "translate-x-0"}`}
       >

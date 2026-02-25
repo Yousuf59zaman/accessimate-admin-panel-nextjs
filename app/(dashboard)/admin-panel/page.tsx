@@ -211,7 +211,7 @@ export default function AdminPanelPage() {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 gap-6">
         {/* Line Chart — Full width */}
-        <div className="dashboard-card flex flex-col p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div className="transition-all duration-300 ease-in hover:-translate-y-0.5 hover:shadow-md flex flex-col p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
           <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
             Line Chart
           </h3>
@@ -223,7 +223,7 @@ export default function AdminPanelPage() {
         {/* Pie + Bar — Two column grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Pie Chart */}
-          <div className="dashboard-card flex flex-col justify-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+          <div className="transition-all duration-300 ease-in hover:-translate-y-0.5 hover:shadow-md flex flex-col justify-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
             <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
               Chart Distribution
             </h3>
@@ -233,7 +233,7 @@ export default function AdminPanelPage() {
           </div>
 
           {/* Bar Chart */}
-          <div className="dashboard-card flex flex-col p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+          <div className="transition-all duration-300 ease-in hover:-translate-y-0.5 hover:shadow-md flex flex-col p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
             <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
               Monthly Statistics
             </h3>

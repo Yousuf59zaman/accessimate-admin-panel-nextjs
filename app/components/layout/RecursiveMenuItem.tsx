@@ -107,7 +107,7 @@ export default function RecursiveMenuItem({
   );
 
   return (
-    <div className="menu-item mb-0.5" ref={menuRef}>
+    <div className="mb-0.5" ref={menuRef}>
       {/* Leaf menu item (no children, or has a real route) */}
       {isLeafItem && (
         <div
@@ -201,9 +201,11 @@ export default function RecursiveMenuItem({
 
       {/* Recursive children — expanded sidebar, tree view */}
       {hasChildren && item.is_open && isExpanded && (
-        <div className="menu-item-children ml-3 relative py-0">
+        <div className="ml-3 relative pt-0 pb-0">
           {/* Vertical line connecting all children */}
-          {item.child!.length > 0 && <div className="tree-vertical-line" />}
+          {item.child!.length > 0 && (
+            <div className="absolute left-0 top-0 w-px h-[calc(100%-0.6rem)] bg-gray-300 dark:bg-gray-600 z-1" />
+          )}
           {item.child!.map((child) => (
             <RecursiveMenuItem
               key={child.id || child.name}
