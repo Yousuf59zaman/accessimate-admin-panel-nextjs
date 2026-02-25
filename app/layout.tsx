@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "primeicons/primeicons.css";
 import { AdminAuthProvider } from "@/app/contexts/AdminAuthContext";
 import { CitizenAuthProvider } from "@/app/contexts/CitizenAuthContext";
 import { SidebarProvider } from "@/app/contexts/SidebarContext";
 import { ThemeProvider } from "next-themes";
+import PrimeReactSetup from "@/app/primereact-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,11 +41,13 @@ export default function RootLayout({
           defaultTheme="light"
           disableTransitionOnChange
         >
-          <AdminAuthProvider>
-            <CitizenAuthProvider>
-              <SidebarProvider>{children}</SidebarProvider>
-            </CitizenAuthProvider>
-          </AdminAuthProvider>
+          <PrimeReactSetup>
+            <AdminAuthProvider>
+              <CitizenAuthProvider>
+                <SidebarProvider>{children}</SidebarProvider>
+              </CitizenAuthProvider>
+            </AdminAuthProvider>
+          </PrimeReactSetup>
         </ThemeProvider>
       </body>
     </html>

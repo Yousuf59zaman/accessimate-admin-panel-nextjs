@@ -62,3 +62,142 @@ body {
   margin-bottom: 0.125rem;
 }
 
+/* ─── Modal Animations ─────────────────────────────────────── */
+
+@keyframes animate-modal-enter {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.animate-modal-enter { animation: animate-modal-enter 0.2s ease-out; }
+
+/* ConfirmModal — Warning icon */
+.f-modal-alert .f-modal-icon {
+  border-radius: 50%;
+  border: 4px solid gray;
+  box-sizing: content-box;
+  height: 80px;
+  margin: 20px auto;
+  padding: 0;
+  position: relative;
+  width: 80px;
+}
+
+.f-modal-alert .f-modal-icon.f-modal-warning {
+  border-color: #F8BB86;
+}
+.f-modal-alert .f-modal-icon.f-modal-warning::before {
+  animation: pulseWarning 2s linear infinite;
+  background-color: #fff;
+  border-radius: 50%;
+  content: "";
+  display: inline-block;
+  height: 100%;
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+}
+.f-modal-alert .f-modal-icon.f-modal-warning::after {
+  background-color: #fff;
+  border-radius: 50%;
+  content: '';
+  display: block;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+  z-index: 1;
+}
+.f-modal-alert .f-modal-icon.f-modal-warning .f-modal-body {
+  background-color: #F8BB86;
+  border-radius: 2px;
+  height: 47px;
+  left: 50%;
+  margin-left: -2px;
+  position: absolute;
+  top: 10px;
+  width: 5px;
+  z-index: 2;
+}
+.f-modal-alert .f-modal-icon.f-modal-warning .f-modal-dot {
+  background-color: #F8BB86;
+  border-radius: 50%;
+  bottom: 10px;
+  height: 7px;
+  left: 50%;
+  margin-left: -3px;
+  position: absolute;
+  width: 7px;
+  z-index: 2;
+}
+
+.scaleWarning { animation: scaleWarning 0.75s infinite alternate; }
+.pulseWarningIns { animation: pulseWarningIns 0.75s infinite alternate; }
+
+@keyframes scaleWarning {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+@keyframes pulseWarning {
+  0%   { background-color: #fff; transform: scale(1); opacity: 0.5; }
+  30%  { background-color: #fff; transform: scale(1); opacity: 0.5; }
+  100% { background-color: #F8BB86; transform: scale(2); opacity: 0; }
+}
+@keyframes pulseWarningIns {
+  0%   { background-color: #F8D486; }
+  100% { background-color: #F8BB86; }
+}
+
+/* ResponseModal — Success SVG animation */
+.ui-success-circle {
+  stroke-dasharray: 260.752px, 260.752px;
+  stroke-dashoffset: 260.752px;
+  transform-origin: center center;
+  stroke-linecap: round;
+  animation: ani-success-circle 1s ease-in both;
+}
+.ui-success-path {
+  stroke-dasharray: 60px 64px;
+  stroke-dashoffset: 62px;
+  stroke-linecap: round;
+  animation: ani-success-path 0.4s 1s ease-in both;
+}
+
+@keyframes ani-success-circle {
+  to { stroke-dashoffset: 782.256px; }
+}
+@keyframes ani-success-path {
+  0%   { stroke-dashoffset: 62px; }
+  65%  { stroke-dashoffset: -5px; }
+  84%  { stroke-dashoffset: 4px; }
+  100% { stroke-dashoffset: -2px; }
+}
+
+/* ResponseModal — Error SVG animation */
+.ui-error-circle {
+  stroke-dasharray: 260.752px, 260.752px;
+  stroke-dashoffset: 260.752px;
+  animation: ani-error-circle 1.2s linear;
+}
+.ui-error-line1 {
+  stroke-dasharray: 54px 55px;
+  stroke-dashoffset: 55px;
+  stroke-linecap: round;
+  animation: ani-error-line 0.15s 1.2s linear both;
+}
+.ui-error-line2 {
+  stroke-dasharray: 54px 55px;
+  stroke-dashoffset: 55px;
+  stroke-linecap: round;
+  animation: ani-error-line 0.2s 0.9s linear both;
+}
+
+@keyframes ani-error-line {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes ani-error-circle {
+  0%   { stroke-dasharray: 0, 260.752px; stroke-dashoffset: 0; }
+  35%  { stroke-dasharray: 120px, 120px; stroke-dashoffset: -120px; }
+  70%  { stroke-dasharray: 0, 260.752px; stroke-dashoffset: -260.752px; }
+  100% { stroke-dasharray: 260.752px, 0; stroke-dashoffset: -260.752px; }
+}
+
