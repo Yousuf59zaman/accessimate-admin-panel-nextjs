@@ -3,8 +3,6 @@
 /* Dark mode support (class-based via next-themes) */
 @custom-variant dark (&:where(.dark *));
 
-/* FontAwesome */
-@import url("/fa-6.4.0/css/all.css");
 
 /* Custom theme tokens (equivalent to tailwind.config.js extend) */
 @theme inline {
