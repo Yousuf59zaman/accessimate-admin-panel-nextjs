@@ -56,6 +56,8 @@ interface UseCrudPageOptions {
   apiBase: string;
   /** Items per page (default: 10) */
   pageSize?: number;
+  /** Initial status option (default: Active with status=1). Use optionsAcTr()[0] for tables without a status column. */
+  initialStatus?: OptionItem;
 }
 
 interface CrudActionResult {
@@ -85,7 +87,7 @@ interface UseCrudPageReturn<T> {
 export function useCrudPage<T extends { id: number | string }>(
   options: UseCrudPageOptions
 ): UseCrudPageReturn<T> {
-  const { apiEndpoint, apiBase, pageSize = 10 } = options;
+  const { apiEndpoint, apiBase, pageSize = 10, initialStatus } = options;
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -103,11 +105,9 @@ export function useCrudPage<T extends { id: number | string }>(
     to: 0,
   });
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<OptionItem>({
-    name: 'Active',
-    key: 'status',
-    value: '1',
-  });
+  const [status, setStatus] = useState<OptionItem>(
+    initialStatus ?? { name: 'Active', key: 'status', value: '1' }
+  );
 
   // ─── Load data from API ─────────────────────────────────
 

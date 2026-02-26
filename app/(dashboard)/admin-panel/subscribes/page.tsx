@@ -2,38 +2,34 @@
 
 import { Suspense, useCallback, useState } from "react";
 import { useCrudPage } from "@/app/hooks/useCrudPage";
-import { optionsListAcIn } from "@/app/helpers/globalFunctions";
+import { optionsListAcIn, viewFormatDate } from "@/app/helpers/globalFunctions";
 import Pagination from "@/app/components/ui/Pagination";
-import ConfirmModal from "@/app/components/ui/ConfirmModal";
 import ResponseModal from "@/app/components/ui/ResponseModal";
-import AddEdit from "@/app/components/admin-panel/email-templates/AddEdit";
 
-interface EmailTemplate {
+interface Subscribe {
   id: number;
-  name: string;
-  slug: string;
+  email: string;
+  subscribed_at: string | null;
+  expires_at: string | null;
+  is_active: number;
   status: number;
 }
 
-function EmailTemplatesPageInner() {
+function SubscribesPageInner() {
   const optionsList = optionsListAcIn();
   const {
     data,
     isLoading,
-    permissions,
     paginationMeta,
     search,
     setSearch,
     status,
     setStatus,
     loadData,
-    handleDelete,
-    handleRestore,
-    handleAfterSave,
     resetPagination,
-  } = useCrudPage<EmailTemplate>({
-    apiEndpoint: "admin/email-templates/all",
-    apiBase: "admin/email-templates",
+  } = useCrudPage<Subscribe>({
+    apiEndpoint: "admin/subscribes/all",
+    apiBase: "admin/subscribes",
     pageSize: 10,
   });
 
@@ -59,50 +55,10 @@ function EmailTemplatesPageInner() {
     [optionsList, setStatus, resetPagination],
   );
 
-  const [isOpenModal, setIsOpenModal] = useState(false);
-  const [modalTitle, setModalTitle] = useState("Create");
-  const [editItem, setEditItem] = useState<EmailTemplate | null>(null);
-  const addNew = () => {
-    setEditItem(null);
-    setModalTitle("Create");
-    setIsOpenModal(true);
-  };
-  const editHandler = (item: EmailTemplate) => {
-    setEditItem(item);
-    setModalTitle("Edit");
-    setIsOpenModal(true);
-  };
-  const cancelModal = () => {
-    setEditItem(null);
-    setIsOpenModal(false);
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const receivedData = (item: any) => {
-    handleAfterSave(item as EmailTemplate, modalTitle === "Edit");
-    setIsOpenModal(false);
-  };
-
-  const [isOpenConModal, setIsOpenConModal] = useState(false);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
   const [responseModal, setResponseModal] = useState<Record<string, unknown>>(
     {},
   );
-  const openDeleteModal = (id: number) => {
-    setDeleteId(id);
-    setIsOpenConModal(true);
-  };
-  const deleteHandler = async () => {
-    if (deleteId === null) return;
-    setResponseModal({});
-    const { response } = await handleDelete(deleteId);
-    setResponseModal(response);
-    setIsOpenConModal(false);
-  };
-  const restoreAction = async (id: number) => {
-    setResponseModal({});
-    const { response } = await handleRestore(id);
-    setResponseModal(response);
-  };
+
   const paginationConfig = {
     data: paginationMeta,
     lang: "en",
@@ -114,20 +70,21 @@ function EmailTemplatesPageInner() {
     <tbody>
       {Array.from({ length: 10 }).map((_, idx) => (
         <tr key={idx}>
-          <td className="p-3">
-            <div className="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <td className="text-gray-800 dark:text-gray-200 text-start p-3">
+            <div className="w-32 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
           </td>
           <td className="p-3">
-            <div className="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-          </td>
-          <td className="p-3">
-            <div className="flex justify-center">
-              <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="flex justify-center items-center">
+              <div className="w-24 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             </div>
           </td>
           <td className="p-3">
-            <div className="flex justify-center gap-2">
-              <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="flex justify-center items-center">
+              <div className="w-24 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex justify-center items-center">
               <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             </div>
           </td>
@@ -184,24 +141,13 @@ function EmailTemplatesPageInner() {
               </div>
             </div>
           </div>
-          {isLoading ? (
-            <div className="w-28 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
-          ) : (
-            permissions?.add && (
-              <button
-                onClick={addNew}
-                className="px-4 py-2 bg-sky-500 text-white text-xs font-medium rounded-md hover:bg-sky-600 transition-colors whitespace-nowrap"
-              >
-                Create Template
-              </button>
-            )
-          )}
         </div>
+
         <div className="pb-2 flex flex-col justify-between w-full">
           <div className="mt-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
             <div className="border-b border-gray-200 dark:border-gray-700">
               <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 py-2 px-4">
-                Email Templates
+                Subscribers
               </h4>
             </div>
             <div className="p-4">
@@ -209,33 +155,26 @@ function EmailTemplatesPageInner() {
                 <table className="table-auto w-full">
                   <thead className="sticky z-10 top-0 bg-gray-50 dark:bg-gray-900">
                     <tr>
-                      <th className="text-left p-3" style={{ width: "10%" }}>
+                      <th className="text-left p-3" style={{ width: "50%" }}>
                         <span className="text-gray-800 dark:text-gray-200">
-                          Name
+                          Title
+                        </span>
+                      </th>
+                      <th className="text-center p-3" style={{ width: "20%" }}>
+                        <span className="text-gray-800 dark:text-gray-200">
+                          Subscribed
+                        </span>
+                      </th>
+                      <th className="text-center p-3" style={{ width: "20%" }}>
+                        <span className="text-gray-800 dark:text-gray-200">
+                          Expires
                         </span>
                       </th>
                       <th className="text-center p-3" style={{ width: "10%" }}>
                         <span className="text-gray-800 dark:text-gray-200">
-                          Slug
-                        </span>
-                      </th>
-                      <th className="text-center p-3" style={{ width: "5%" }}>
-                        <span className="text-gray-800 dark:text-gray-200">
                           Status
                         </span>
                       </th>
-                      {(permissions.edit ||
-                        permissions.delete ||
-                        isLoading) && (
-                        <th
-                          className="text-center p-3"
-                          style={{ width: "10%" }}
-                        >
-                          <span className="text-gray-800 dark:text-gray-200">
-                            Action
-                          </span>
-                        </th>
-                      )}
                     </tr>
                   </thead>
                   {isLoading ? (
@@ -248,16 +187,33 @@ function EmailTemplatesPageInner() {
                           className="border-t border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                         >
                           <td className="text-gray-800 dark:text-gray-200 text-start p-3">
-                            {item.name}
+                            <div className="flex justify-start gap-2">
+                              <span className="text-sm">{item?.email}</span>
+                            </div>
                           </td>
-                          <td className="text-gray-800 dark:text-gray-200 text-center p-3">
-                            {item.slug}
+                          <td className="text-gray-800 dark:text-gray-200 text-start p-3">
+                            <div className="flex justify-center gap-2">
+                              <span className="text-sm">
+                                {item.subscribed_at
+                                  ? viewFormatDate(item.subscribed_at)
+                                  : "-"}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="text-gray-800 dark:text-gray-200 text-start p-3">
+                            <div className="flex justify-center gap-2">
+                              <span className="text-sm">
+                                {item.expires_at
+                                  ? viewFormatDate(item.expires_at)
+                                  : "-"}
+                              </span>
+                            </div>
                           </td>
                           <td className="p-3">
                             <div className="flex justify-center items-center">
                               <span
                                 className={
-                                  item.status === 1
+                                  item.is_active === 1
                                     ? "text-green-600"
                                     : "text-red-500"
                                 }
@@ -269,34 +225,6 @@ function EmailTemplatesPageInner() {
                               </span>
                             </div>
                           </td>
-                          {(permissions.edit || permissions.delete) && (
-                            <td className="p-3">
-                              {status.key === "trashed" &&
-                              permissions.delete ? (
-                                <div className="flex justify-center items-center gap-2">
-                                  <i
-                                    onClick={() => restoreAction(item.id)}
-                                    className="fa-solid fa-trash-restore text-green-500 hover:text-green-800 cursor-pointer transition duration-150 ease-in-out"
-                                  />
-                                </div>
-                              ) : (
-                                <div className="flex justify-center items-center gap-2">
-                                  {permissions.edit && (
-                                    <i
-                                      onClick={() => editHandler(item)}
-                                      className="fa-solid fa-pen-to-square text-gray-800 dark:text-gray-200 hover:text-green-500 cursor-pointer transition duration-150 ease-in-out"
-                                    />
-                                  )}
-                                  {permissions.delete && (
-                                    <i
-                                      onClick={() => openDeleteModal(item.id)}
-                                      className="fa-solid fa-trash text-red-500 hover:text-red-800 cursor-pointer transition duration-150 ease-in-out"
-                                    />
-                                  )}
-                                </div>
-                              )}
-                            </td>
-                          )}
                         </tr>
                       ))}
                       {data.length === 0 && (
@@ -305,7 +233,7 @@ function EmailTemplatesPageInner() {
                             colSpan={4}
                             className="text-center py-8 text-gray-500 dark:text-gray-400"
                           >
-                            No items found.
+                            No subscribers found.
                           </td>
                         </tr>
                       )}
@@ -314,13 +242,6 @@ function EmailTemplatesPageInner() {
                 </table>
               </div>
             </div>
-            <AddEdit
-              isOpen={isOpenModal}
-              item={editItem}
-              modalTitle={modalTitle}
-              onClose={cancelModal}
-              onSave={receivedData}
-            />
             {!isLoading && (
               <div className="px-4">
                 <Pagination
@@ -329,11 +250,6 @@ function EmailTemplatesPageInner() {
                 />
               </div>
             )}
-            <ConfirmModal
-              isOpen={isOpenConModal}
-              onConfirm={deleteHandler}
-              onClose={() => setIsOpenConModal(false)}
-            />
             <ResponseModal
               data={
                 responseModal as {
@@ -351,7 +267,7 @@ function EmailTemplatesPageInner() {
   );
 }
 
-export default function EmailTemplatesPage() {
+export default function SubscribesPage() {
   return (
     <Suspense
       fallback={
@@ -360,7 +276,7 @@ export default function EmailTemplatesPage() {
         </div>
       }
     >
-      <EmailTemplatesPageInner />
+      <SubscribesPageInner />
     </Suspense>
   );
 }

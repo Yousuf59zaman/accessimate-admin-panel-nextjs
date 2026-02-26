@@ -4,14 +4,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import { fetchAdmin } from "@/app/lib/fetchAdmin";
 import ResponseModal from "@/app/components/ui/ResponseModal";
 
-interface RoleItem { id?: number; role_name?: string; slug?: string; status?: number; }
-interface FormData { role_name: string; slug: string; status: number; }
+interface RoleItem { id?: number; role_name?: string; status?: number; }
+interface FormData { role_name: string; status: number; }
 interface SubmitApiResponse { status: boolean; message?: string; data: RoleItem; }
 interface FetchError extends Error { response?: Response; data?: { status?: boolean; message?: string; data?: Record<string, string[]> }; }
 interface AddEditProps { isOpen: boolean; item: RoleItem | null; modalTitle: string; onClose: () => void; onSave: (item: RoleItem) => void; }
 
-const emptyForm: FormData = { role_name: "", slug: "", status: 0 };
-const skipValidations = ["status"];
+const emptyForm: FormData = { role_name: "", status: 0 };
+const skipValidations = ["id", "status"];
 
 export default function AddEdit({ isOpen, item, modalTitle, onClose, onSave }: AddEditProps) {
   const [formData, setFormData] = useState<FormData>({ ...emptyForm });
@@ -21,7 +21,7 @@ export default function AddEdit({ isOpen, item, modalTitle, onClose, onSave }: A
   const [responseModal, setResponseModal] = useState<Record<string, unknown>>({});
 
   useEffect(() => {
-    if (item && Object.keys(item).length > 0) { setValidationErrors({}); setFormData({ role_name: item.role_name || "", slug: item.slug || "", status: item.status || 0 }); setIsChecked(item.status === 1); }
+    if (item && Object.keys(item).length > 0) { setValidationErrors({}); setFormData({ role_name: item.role_name || "", status: item.status || 0 }); setIsChecked(item.status === 1); }
     else { setFormData({ ...emptyForm }); setIsChecked(false); setValidationErrors({}); }
   }, [item]);
 
@@ -51,30 +51,23 @@ export default function AddEdit({ isOpen, item, modalTitle, onClose, onSave }: A
   };
 
   if (!isOpen) return null;
-  const inputClass = (field: string) => `w-full border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sky-500 ${validationErrors[field] ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`;
+  const inputClass = (field: string) => `w-full flex-auto border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sky-500 ${validationErrors[field] ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`;
 
   return (
     <>
       <div className="fixed inset-0 z-9999 flex items-center justify-center">
         <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-        <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg mx-4 animate-modal-enter max-h-[90vh] overflow-y-auto">
+        <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 animate-modal-enter max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-center w-full gap-2 p-4 border-b border-gray-200 dark:border-gray-700"><h4 className="text-xl font-semibold text-gray-900 dark:text-white">{modalTitle} Role</h4></div>
-          <div className="grid grid-cols-1 gap-4 p-6">
-            <div className="flex items-center gap-4">
-              <label className="font-semibold w-24 text-gray-900 dark:text-white">Role Name</label>
+          <div className="p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <label className="font-semibold w-24 text-gray-900 dark:text-white">Name</label>
               <div className="flex-auto">
                 <input type="text" value={formData.role_name} onChange={(e) => updateField("role_name", e.target.value)} placeholder="i.e. Admin" className={inputClass("role_name")} autoComplete="off" onFocus={() => setValidationErrors((prev) => ({ ...prev, role_name: "" }))} />
                 {validationErrors.role_name && <p className="text-red-500 text-sm mt-1">{validationErrors.role_name}</p>}
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <label className="font-semibold w-24 text-gray-900 dark:text-white">Slug</label>
-              <div className="flex-auto">
-                <input type="text" value={formData.slug} onChange={(e) => updateField("slug", e.target.value)} placeholder="i.e. admin" className={inputClass("slug")} autoComplete="off" onFocus={() => setValidationErrors((prev) => ({ ...prev, slug: "" }))} />
-                {validationErrors.slug && <p className="text-red-500 text-sm mt-1">{validationErrors.slug}</p>}
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 mb-4">
               <label className="font-semibold w-24 text-gray-900 dark:text-white">Status</label>
               <div className="flex-auto"><button type="button" onClick={() => setIsChecked(!isChecked)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isChecked ? "bg-sky-500" : "bg-gray-300 dark:bg-gray-600"}`}><span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isChecked ? "translate-x-6" : "translate-x-1"}`} /></button></div>
             </div>
