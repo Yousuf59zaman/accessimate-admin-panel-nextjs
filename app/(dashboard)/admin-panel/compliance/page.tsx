@@ -1,22 +1,23 @@
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
+import Image from "next/image";
 import { useCrudPage } from "@/app/hooks/useCrudPage";
-import { optionsListAcIn } from "@/app/helpers/globalFunctions";
+import { optionsList } from "@/app/helpers/globalFunctions";
 import Pagination from "@/app/components/ui/Pagination";
 import ConfirmModal from "@/app/components/ui/ConfirmModal";
 import ResponseModal from "@/app/components/ui/ResponseModal";
 import AddEdit from "@/app/components/admin-panel/compliance/AddEdit";
 
-interface ComplianceItem { id: number; title: string; slug: string; status: number; }
+interface ComplianceItem { id: number; title: string; slug: string; description?: string; images?: string; status: number; }
 
 function CompliancePageInner() {
-  const optionsList = optionsListAcIn();
-  const { data, isLoading, permissions, paginationMeta, search, setSearch, status, setStatus, loadData, handleDelete, handleRestore, handleAfterSave, resetPagination } = useCrudPage<ComplianceItem>({ apiEndpoint: "admin/compliance/all", apiBase: "admin/compliance", pageSize: 10 });
+  const options = optionsList();
+  const { data, isLoading, permissions, paginationMeta, search, setSearch, status, setStatus, loadData, handleDelete, handleRestore, handleAfterSave, resetPagination } = useCrudPage<ComplianceItem>({ apiEndpoint: "admin/compliances/all", apiBase: "admin/compliances", pageSize: 10 });
 
   const [searchInput, setSearchInput] = useState(search);
   const onSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => { const val = e.target.value; setSearchInput(val); setSearch(val); }, [setSearch]);
-  const onStatusChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => { const selected = optionsList.find((o) => `${o.key}-${o.value}` === e.target.value); if (selected) { setStatus(selected); resetPagination(); } }, [optionsList, setStatus, resetPagination]);
+  const onStatusChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => { const selected = options.find((o) => `${o.key}-${o.value}` === e.target.value); if (selected) { setStatus(selected); resetPagination(); } }, [options, setStatus, resetPagination]);
 
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("Create");
@@ -35,7 +36,7 @@ function CompliancePageInner() {
   const restoreAction = async (id: number) => { setResponseModal({}); const { response } = await handleRestore(id); setResponseModal(response); };
   const paginationConfig = { data: paginationMeta, lang: "en", align: "center" as const, action: undefined as "ajax" | "url" | undefined };
 
-  const renderSkeleton = () => (<tbody>{Array.from({ length: 10 }).map((_, idx) => (<tr key={idx}><td className="p-3"><div className="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /></td><td className="p-3"><div className="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /></td><td className="p-3"><div className="flex justify-center"><div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /></div></td><td className="p-3"><div className="flex justify-center gap-2"><div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /><div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /></div></td></tr>))}</tbody>);
+  const renderSkeleton = () => (<tbody>{Array.from({ length: 10 }).map((_, idx) => (<tr key={idx}><td className="p-3"><div className="flex items-center gap-2"><div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" /><div className="flex flex-col gap-2"><div className="w-32 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /><div className="w-24 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /></div></div></td><td className="p-3"><div className="flex justify-center"><div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /></div></td><td className="p-3"><div className="flex justify-center gap-2"><div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /><div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /></div></td></tr>))}</tbody>);
 
   return (
     <div className="h-full mx-auto max-w-7xl px-2 sm:px-6 lg:px-8 my-6">
@@ -50,7 +51,7 @@ function CompliancePageInner() {
               <div className="flex items-center gap-3 w-full md:w-auto">
                 <label htmlFor="status" className="text-gray-800 dark:text-gray-200">Status</label>
                 <select id="status" value={`${status.key}-${status.value}`} onChange={onStatusChange} className="w-full md:w-auto border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                  {optionsList.map((opt) => (<option key={`${opt.key}-${opt.value}`} value={`${opt.key}-${opt.value}`}>{opt.name}</option>))}
+                  {options.map((opt) => (<option key={`${opt.key}-${opt.value}`} value={`${opt.key}-${opt.value}`}>{opt.name}</option>))}
                 </select>
               </div>
             </div>
@@ -59,15 +60,14 @@ function CompliancePageInner() {
         </div>
         <div className="pb-2 flex flex-col justify-between w-full">
           <div className="mt-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-            <div className="border-b border-gray-200 dark:border-gray-700"><h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 py-2 px-4">Compliance</h4></div>
+            <div className="border-b border-gray-200 dark:border-gray-700"><h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 py-2 px-4">Compliances</h4></div>
             <div className="p-4">
               <div className="custom_table overflow-auto border-b border-gray-200 dark:border-gray-700">
                 <table className="table-auto w-full">
                   <thead className="sticky z-10 top-0 bg-gray-50 dark:bg-gray-900">
                     <tr>
-                      <th className="text-left p-3" style={{ width: "30%" }}><span className="text-gray-800 dark:text-gray-200">Title</span></th>
-                      <th className="text-left p-3" style={{ width: "30%" }}><span className="text-gray-800 dark:text-gray-200">Slug</span></th>
-                      <th className="text-center p-3" style={{ width: "10%" }}><span className="text-gray-800 dark:text-gray-200">Status</span></th>
+                      <th className="text-left p-3" style={{ width: "80%" }}><span className="text-gray-800 dark:text-gray-200">Title</span></th>
+                      <th className="text-center p-3" style={{ width: "5%" }}><span className="text-gray-800 dark:text-gray-200">Status</span></th>
                       {(permissions.edit || permissions.delete || isLoading) && (<th className="text-center p-3" style={{ width: "10%" }}><span className="text-gray-800 dark:text-gray-200">Action</span></th>)}
                     </tr>
                   </thead>
@@ -75,13 +75,20 @@ function CompliancePageInner() {
                     <tbody>
                       {data.map((item) => (
                         <tr key={item.id} className="border-t border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                          <td className="text-gray-800 dark:text-gray-200 text-start p-3">{item.title}</td>
-                          <td className="text-gray-800 dark:text-gray-200 text-start p-3">{item.slug}</td>
+                          <td className="text-gray-800 dark:text-gray-200 text-start p-3">
+                            <div className="flex items-center gap-2">
+                                <Image src={item.images || "/svg/not-found-img.svg"} alt={item.title} width={96} height={96} className="w-24 h-24 object-cover rounded-md" />
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-sm font-semibold">{item.title}</span>
+                                    <span className="text-sm">{item.description}</span>
+                                </div>
+                            </div>
+                          </td>
                           <td className="p-3"><div className="flex justify-center items-center"><span className={item.status === 1 ? "text-green-600" : "text-red-500"}><i className="fa fa-power-off" aria-hidden="true" /></span></div></td>
                           {(permissions.edit || permissions.delete) && (<td className="p-3">{status.key === "trashed" && permissions.delete ? (<div className="flex justify-center items-center gap-2"><i onClick={() => restoreAction(item.id)} className="fa-solid fa-trash-restore text-green-500 hover:text-green-800 cursor-pointer transition duration-150 ease-in-out" /></div>) : (<div className="flex justify-center items-center gap-2">{permissions.edit && (<i onClick={() => editHandler(item)} className="fa-solid fa-pen-to-square text-gray-800 dark:text-gray-200 hover:text-green-500 cursor-pointer transition duration-150 ease-in-out" />)}{permissions.delete && (<i onClick={() => openDeleteModal(item.id)} className="fa-solid fa-trash text-red-500 hover:text-red-800 cursor-pointer transition duration-150 ease-in-out" />)}</div>)}</td>)}
                         </tr>
                       ))}
-                      {data.length === 0 && (<tr><td colSpan={4} className="text-center py-8 text-gray-500 dark:text-gray-400">No items found.</td></tr>)}
+                      {data.length === 0 && (<tr><td colSpan={3} className="text-center py-8 text-gray-500 dark:text-gray-400">No items found.</td></tr>)}
                     </tbody>
                   )}
                 </table>
