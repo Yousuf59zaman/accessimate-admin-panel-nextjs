@@ -39,25 +39,26 @@ export default function AdminSidebar() {
 
   // Automatically open the parent if a child is selected
   const updateMenuState = useCallback(() => {
-    const setActiveState = (items: MenuItem[]) => {
-      items.forEach((item) => {
-        if (item.child && item.child.length) {
-          item.is_open = item.child.some((child) => {
-            if (child.child && child.child.length) {
-              child.is_open = child.child.some((subChild) =>
-                pathname.startsWith(subChild.route),
-              );
-              return child.is_open || pathname.startsWith(child.route);
-            }
-            return pathname.startsWith(child.route);
-          });
-        }
-      });
-    };
-    setActiveState(menuList);
-    // Force re-render
-    setMenuList([...menuList]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setMenuList((prevList) => {
+      const newList = [...prevList];
+      const setActiveState = (items: MenuItem[]) => {
+        items.forEach((item) => {
+          if (item.child && item.child.length) {
+            item.is_open = item.child.some((child) => {
+              if (child.child && child.child.length) {
+                child.is_open = child.child.some((subChild) =>
+                  pathname.startsWith(subChild.route),
+                );
+                return child.is_open || pathname.startsWith(child.route);
+              }
+              return pathname.startsWith(child.route);
+            });
+          }
+        });
+      };
+      setActiveState(newList);
+      return newList;
+    });
   }, [pathname]);
 
   useEffect(() => {
@@ -75,15 +76,12 @@ export default function AdminSidebar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuList.length]);
 
-  const toggleChildMenu = useCallback(
-    (item: MenuItem) => {
-      if (item.child?.length) {
-        item.is_open = !item.is_open;
-        setMenuList([...menuList]);
-      }
-    },
-    [menuList],
-  );
+  const toggleChildMenu = useCallback((item: MenuItem) => {
+    if (item.child?.length) {
+      item.is_open = !item.is_open;
+      setMenuList((prev) => [...prev]);
+    }
+  }, []);
 
   return (
     <>

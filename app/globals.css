@@ -168,3 +168,33 @@ body {
   100% { stroke-dasharray: 260.752px, 0; stroke-dashoffset: -260.752px; }
 }
 
+/* ─── Menu Tree (Menu Setup Page) ─────────────────────────── */
+
+/* Icon / drag handle swap on hover */
+.menu-tree-item .menu-tree-drag { display: none; }
+.menu-tree-item:hover > div > .menu-tree-icon { display: none; }
+.menu-tree-item:hover > div > .menu-tree-drag { display: flex; }
+
+/* Tree connector lines for children */
+.menu-tree-children {
+  position: relative;
+}
+.menu-tree-children::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: -5px;
+  width: 1px;
+  height: calc(100% + 10px);
+  border-left: 1px solid #999;
+}
+.menu-tree-children > li::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 5px;
+  border-bottom: 1px solid #999;
+  left: -10.8px;
+  top: 12px;
+}
+

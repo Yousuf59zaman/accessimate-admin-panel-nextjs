@@ -8,7 +8,7 @@ interface FetchError extends Error {
 }
 
 interface FetchAdminOptions extends Omit<RequestInit, 'body'> {
-  body?: Record<string, unknown> | FormData | BodyInit | null;
+  body?: Record<string, unknown> | Record<string, unknown>[] | FormData | BodyInit | null;
 }
 
 export async function fetchAdmin<T = unknown>(
