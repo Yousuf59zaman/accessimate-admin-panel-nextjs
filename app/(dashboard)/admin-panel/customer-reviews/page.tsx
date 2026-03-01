@@ -14,7 +14,7 @@ import AddEdit from "@/app/components/admin-panel/customer-reviews/AddEdit";
 interface CustomerReview {
   id: number;
   review: string;
-  rating: number;
+  rating: string;
   plan?: { name: string };
   status: number;
 }
@@ -260,7 +260,7 @@ function CustomerReviewsPageInner() {
                                     {Array.from({ length: 5 }).map((_, i) => (
                                       <i
                                         key={i}
-                                        className={`fa fa-star ${i < (item.rating || 0) ? "text-yellow-400" : "text-gray-300"}`}
+                                        className={`fa fa-star ${i < Number(item.rating || 0) ? "text-yellow-400" : "text-gray-300"}`}
                                       />
                                     ))}
                                   </span>
