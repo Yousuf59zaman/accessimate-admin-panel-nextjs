@@ -12,7 +12,7 @@ interface Partner {
   id: number;
   name: string;
   logo?: string;
-  url?: string;
+  short_desc?: string;
   status: number;
 }
 

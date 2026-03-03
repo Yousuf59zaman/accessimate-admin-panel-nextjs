@@ -183,12 +183,7 @@ function NewsPageInner() {
                     </th>
                     <th className="text-left p-3" style={{ width: "10%" }}>
                       <span className="text-gray-800 dark:text-gray-200">
-                        Question
-                      </span>
-                    </th>
-                    <th className="text-center p-3" style={{ width: "10%" }}>
-                      <span className="text-gray-800 dark:text-gray-200">
-                        Type
+                        Title
                       </span>
                     </th>
                     <th className="text-center p-3" style={{ width: "5%" }}>
@@ -216,11 +211,6 @@ function NewsPageInner() {
                       </td>
                       <td className="p-3">
                         <div className="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                      </td>
-                      <td className="p-3">
-                        <div className="flex justify-center">
-                          <div className="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                        </div>
                       </td>
                       <td className="p-3">
                         <div className="flex justify-center">
@@ -354,15 +344,7 @@ function NewsPageInner() {
                                         style={{ width: "10%" }}
                                       >
                                         <span className="text-gray-800 dark:text-gray-200">
-                                          Question
-                                        </span>
-                                      </th>
-                                      <th
-                                        className="text-center p-3"
-                                        style={{ width: "10%" }}
-                                      >
-                                        <span className="text-gray-800 dark:text-gray-200">
-                                          Type
+                                          Title
                                         </span>
                                       </th>
                                       <th
@@ -397,13 +379,6 @@ function NewsPageInner() {
                                         </td>
                                         <td className="text-gray-800 dark:text-gray-200 text-start p-3">
                                           {item.title}
-                                        </td>
-                                        <td className="text-gray-800 dark:text-gray-200 text-center p-3">
-                                          {item.type
-                                            ? typeList.find(
-                                                (t) => t.id === item.type,
-                                              )?.name || "None"
-                                            : "None"}
                                         </td>
                                         <td className="p-3">
                                           <div className="flex justify-center items-center">

@@ -13,8 +13,10 @@ import AddEdit from "@/app/components/admin-panel/customer-reviews/AddEdit";
 
 interface CustomerReview {
   id: number;
+  plan_id?: number | string;
+  name?: string;
   review: string;
-  rating: string;
+  rating: number | string;
   plan?: { name: string };
   status: number;
 }

@@ -401,7 +401,9 @@ function FaqPageInner() {
                                         <td className="text-gray-800 dark:text-gray-200 text-center p-3">
                                           {item.type
                                             ? typeList.find(
-                                                (t) => t.id === item.type,
+                                                (t) =>
+                                                  String(t.id) ===
+                                                  String(item.type),
                                               )?.name || "None"
                                             : "None"}
                                         </td>
