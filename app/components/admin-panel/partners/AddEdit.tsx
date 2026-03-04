@@ -21,6 +21,7 @@ interface SubmitApiResponse {
   status: boolean;
   message?: string;
   data: Partner;
+  
 }
 interface FetchError extends Error {
   response?: Response;
