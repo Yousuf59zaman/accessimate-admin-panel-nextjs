@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "primeicons/primeicons.css";
 import { AdminAuthProvider } from "@/app/contexts/AdminAuthContext";
@@ -7,6 +7,12 @@ import { CitizenAuthProvider } from "@/app/contexts/CitizenAuthContext";
 import { SidebarProvider } from "@/app/contexts/SidebarContext";
 import { ThemeProvider } from "next-themes";
 import PrimeReactSetup from "@/app/primereact-provider";
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +40,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="/fa-6.4.0/css/all.css" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider
           attribute="class"

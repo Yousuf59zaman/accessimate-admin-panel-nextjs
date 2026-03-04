@@ -100,7 +100,7 @@ export default function RecursiveMenuItem({
   }, [isExpanded, item, onToggleMenu]);
 
   const isLeafItem = item.route !== "#" || !item.child?.length;
-  const hasChildren = !!item.child?.length;
+  const hasChildren = !!(item.child && item.child.length > 0);
   const isActive = currentPath === item.route;
   const hasActiveChild = item.child?.some(
     (child) => currentPath === child.route,
@@ -200,7 +200,7 @@ export default function RecursiveMenuItem({
       )}
 
       {/* Recursive children — expanded sidebar, tree view */}
-      {hasChildren && item.is_open && isExpanded && (
+      {hasChildren && !!item.is_open && isExpanded && (
         <div className="ml-3 relative pt-0 pb-0">
           {/* Vertical line connecting all children */}
           {item.child!.length > 0 && (
@@ -220,7 +220,7 @@ export default function RecursiveMenuItem({
       )}
 
       {/* Collapsed state flyout dropdown */}
-      {hasChildren && !isExpanded && item.is_open && !localIsMobile && (
+      {hasChildren && !isExpanded && !!item.is_open && !localIsMobile && (
         <div
           ref={dropdownRef}
           className="fixed left-[70px] min-w-[220px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-[9999] p-2 overflow-y-auto"
