@@ -85,7 +85,9 @@ export default function AddEdit({
 
   useEffect(() => {
     if (isOpen) {
-      fetchAdmin("admin/faq-categories").then((res: any) => {
+      fetchAdmin<{ data?: { data?: { id: number; title: string }[] } }>(
+        "admin/faq-categories",
+      ).then((res) => {
         if (res?.data?.data) {
           setCategories(res.data.data);
         }
@@ -259,7 +261,7 @@ export default function AddEdit({
                 >
                   <option value="">Select Type</option>
                   {typeList.map((type) => (
-                    <option key={type.id} value={type.id}>
+                    <option key={type.id ?? ""} value={type.id ?? ""}>
                       {type.name}
                     </option>
                   ))}
@@ -305,13 +307,41 @@ export default function AddEdit({
                   Upload Image
                 </label>
                 <div className="flex-auto">
-                  <input
-                    type="text"
-                    value={formData.attachment}
-                    onChange={(e) => updateField("attachment", e.target.value)}
-                    placeholder="Image URL or upload"
-                    className={inputClass("attachment")}
-                  />
+                  <div className="w-full mt-2">
+                    {formData.attachment ? (
+                      <img
+                        src={formData.attachment}
+                        alt="FAQ Image"
+                        className="w-48 h-32 object-cover rounded-md bg-gray-50 dark:bg-gray-700/50 p-1"
+                      />
+                    ) : (
+                      <div className="w-48 h-32 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-center text-gray-400">
+                        <i className="fa fa-camera text-2xl" />
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="mt-3 block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 dark:file:bg-sky-900/30 dark:file:text-sky-400"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            attachment: "",
+                          }));
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            updateField(
+                              "attachment",
+                              ev.target?.result as string,
+                            );
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </div>
                   {validationErrors.attachment && (
                     <p className="text-red-500 text-sm mt-1">
                       {validationErrors.attachment}
@@ -327,13 +357,41 @@ export default function AddEdit({
                   File Upload
                 </label>
                 <div className="flex-auto">
-                  <input
-                    type="text"
-                    value={formData.attachment}
-                    onChange={(e) => updateField("attachment", e.target.value)}
-                    placeholder="File URL or read as DataURL"
-                    className={inputClass("attachment")}
-                  />
+                  <div className="w-full mt-2">
+                    {formData.attachment ? (
+                      <div className="w-48 h-16 bg-gray-50 dark:bg-gray-700/50 rounded-md flex items-center justify-center text-gray-600 dark:text-gray-300 text-sm px-2 truncate">
+                        <i className="fa fa-file mr-2" />
+                        {formData.attachment.startsWith("data:")
+                          ? "File selected"
+                          : formData.attachment}
+                      </div>
+                    ) : (
+                      <div className="w-48 h-16 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-center text-gray-400">
+                        <i className="fa fa-file text-2xl" />
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      className="mt-3 block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 dark:file:bg-sky-900/30 dark:file:text-sky-400"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            attachment: "",
+                          }));
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            updateField(
+                              "attachment",
+                              ev.target?.result as string,
+                            );
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </div>
                   {validationErrors.attachment && (
                     <p className="text-red-500 text-sm mt-1">
                       {validationErrors.attachment}

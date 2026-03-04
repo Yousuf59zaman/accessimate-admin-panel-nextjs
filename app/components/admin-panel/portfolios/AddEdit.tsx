@@ -198,21 +198,39 @@ export default function AddEdit({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-6 overflow-y-auto">
             {/* Row 1: Upload Image */}
-            <div className="col-span-1">
+            <div className="col-span-1 sm:col-span-3">
               <label className="font-semibold block mb-1 text-gray-900 dark:text-white">
                 Upload Image
               </label>
-              <input
-                type="text"
-                value={formData.photo}
-                onChange={(e) => updateField("photo", e.target.value)}
-                placeholder="Image URL"
-                className={inputClass("photo")}
-                autoComplete="off"
-                onFocus={() =>
-                  setValidationErrors((prev) => ({ ...prev, photo: "" }))
-                }
-              />
+              <div className="w-full mt-2">
+                {formData.photo ? (
+                  <img
+                    src={formData.photo}
+                    alt="Portfolio Image"
+                    className="w-48 h-32 object-cover rounded-md bg-gray-50 dark:bg-gray-700/50 p-1"
+                  />
+                ) : (
+                  <div className="w-48 h-32 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-center text-gray-400">
+                    <i className="fa fa-camera text-2xl" />
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="mt-3 block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 dark:file:bg-sky-900/30 dark:file:text-sky-400"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setValidationErrors((prev) => ({ ...prev, photo: "" }));
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        updateField("photo", ev.target?.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </div>
               {validationErrors.photo && (
                 <p className="text-red-500 text-sm mt-1">
                   {validationErrors.photo}

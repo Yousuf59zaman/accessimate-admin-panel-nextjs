@@ -428,17 +428,38 @@ export default function AddEdit({
                 <label className="font-semibold text-gray-900 dark:text-white">
                   OG Image
                 </label>
-                <input
-                  type="text"
-                  value={formData.og_image}
-                  onChange={(e) => updateField("og_image", e.target.value)}
-                  placeholder="OG Image URL"
-                  className={inputClass("og_image")}
-                  autoComplete="off"
-                  onFocus={() =>
-                    setValidationErrors((prev) => ({ ...prev, og_image: "" }))
-                  }
-                />
+                <div className="w-full mt-2">
+                  {formData.og_image ? (
+                    <img
+                      src={formData.og_image}
+                      alt="OG Image"
+                      className="w-full h-32 object-cover rounded-md bg-gray-50 dark:bg-gray-700/50 p-1"
+                    />
+                  ) : (
+                    <div className="w-full h-32 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-center text-gray-400">
+                      <i className="fa fa-camera text-2xl" />
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="mt-3 block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 dark:file:bg-sky-900/30 dark:file:text-sky-400"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          og_image: "",
+                        }));
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          updateField("og_image", ev.target?.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </div>
                 {validationErrors.og_image && (
                   <p className="text-red-500 text-sm mt-1">
                     {validationErrors.og_image}
@@ -451,20 +472,41 @@ export default function AddEdit({
                 <label className="font-semibold text-gray-900 dark:text-white">
                   Twitter Image
                 </label>
-                <input
-                  type="text"
-                  value={formData.twitter_image}
-                  onChange={(e) => updateField("twitter_image", e.target.value)}
-                  placeholder="Twitter Image URL"
-                  className={inputClass("twitter_image")}
-                  autoComplete="off"
-                  onFocus={() =>
-                    setValidationErrors((prev) => ({
-                      ...prev,
-                      twitter_image: "",
-                    }))
-                  }
-                />
+                <div className="w-full mt-2">
+                  {formData.twitter_image ? (
+                    <img
+                      src={formData.twitter_image}
+                      alt="Twitter Image"
+                      className="w-full h-32 object-cover rounded-md bg-gray-50 dark:bg-gray-700/50 p-1"
+                    />
+                  ) : (
+                    <div className="w-full h-32 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-center text-gray-400">
+                      <i className="fa fa-camera text-2xl" />
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="mt-3 block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 dark:file:bg-sky-900/30 dark:file:text-sky-400"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          twitter_image: "",
+                        }));
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          updateField(
+                            "twitter_image",
+                            ev.target?.result as string,
+                          );
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </div>
                 {validationErrors.twitter_image && (
                   <p className="text-red-500 text-sm mt-1">
                     {validationErrors.twitter_image}

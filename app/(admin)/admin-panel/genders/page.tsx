@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useState } from "react";
 import { useCrudPage } from "@/app/hooks/useCrudPage";
-import { optionsListAcIn } from "@/app/helpers/globalFunctions";
+import { optionsList as optionsListFn } from "@/app/helpers/globalFunctions";
 import Pagination from "@/app/components/ui/Pagination";
 import ConfirmModal from "@/app/components/ui/ConfirmModal";
 import ResponseModal from "@/app/components/ui/ResponseModal";
@@ -15,7 +15,7 @@ interface Gender {
 }
 
 function GendersPageInner() {
-  const optionsList = optionsListAcIn();
+  const optionsList = optionsListFn();
   const {
     data,
     isLoading,

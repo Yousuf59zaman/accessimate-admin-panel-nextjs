@@ -106,7 +106,7 @@ export function useCrudPage<T extends { id: number | string }>(
   });
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<OptionItem>(
-    initialStatus ?? { name: 'Active', key: 'status', value: '1' }
+    initialStatus ?? { name: 'All', value: '', key: '' }
   );
 
   // ─── Load data from API ─────────────────────────────────
