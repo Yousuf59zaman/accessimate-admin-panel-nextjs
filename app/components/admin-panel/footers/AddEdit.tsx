@@ -141,8 +141,8 @@ export default function AddEdit({
           ? (data as FooterGroupType[])
           : (Object.values(data) as FooterGroupType[]),
       );
-    } catch (e) {
-      console.error(e);
+    } catch {
+      // Group types endpoint may not be available — degrade gracefully
       setFooterGroupTypes([]);
     } finally {
       setIsLoadingGroupTypes(false);

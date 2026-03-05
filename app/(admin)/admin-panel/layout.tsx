@@ -18,7 +18,7 @@ const AdminPanelLayout = ({ children }: { children: React.ReactNode }) => {
         }`}
       >
         <AdminHeader />
-        <main>{children}</main>
+        <main className="page-enter">{children}</main>
       </div>
     </div>
   );

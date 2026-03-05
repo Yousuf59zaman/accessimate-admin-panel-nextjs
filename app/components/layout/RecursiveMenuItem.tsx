@@ -106,106 +106,96 @@ export default function RecursiveMenuItem({
     (child) => currentPath === child.route,
   );
 
+  // Modern active/hover styles
+  // If it's a parent item and it's open (or has an active child), it gets a solid pill background
+  const parentOpenClasses =
+    !isLeafItem && (item.is_open || hasActiveChild)
+      ? "bg-slate-50 dark:bg-slate-800/80"
+      : "";
+
+  // If it's a leaf/child item and it's active, it gets a rounded background with a left border
+  const childActiveClasses =
+    isLeafItem && isActive
+      ? "bg-brand-50 dark:bg-brand-900/20 border-l-[3px] border-l-brand-600 dark:border-l-brand-400"
+      : "";
+
+  const hoverClasses =
+    !isActive && !(!isLeafItem && (item.is_open || hasActiveChild))
+      ? "hover:bg-slate-50 dark:hover:bg-slate-800/50"
+      : "";
+
   return (
-    <div className="mb-0.5" ref={menuRef}>
+    <div className={`${level === 0 ? "px-2" : ""} mb-0.5`} ref={menuRef}>
       {/* Leaf menu item (no children, or has a real route) */}
       {isLeafItem && (
-        <div
-          className={`menu-item-header text-gray-600 dark:text-white text-base font-medium leading-normal cursor-pointer ${
-            isActive ? "rounded-md" : ""
-          } ${level > 0 ? "relative pl-2" : ""}`}
+        <Link
+          href={item.route === "#" ? "" : item.route}
+          className={`group flex items-center gap-3 rounded-r-3xl rounded-l-md mx-0 cursor-pointer transition-all duration-200
+            ${isExpanded ? "px-3 py-2" : "px-0 py-2 justify-center"}
+            ${childActiveClasses} ${hoverClasses}
+            ${level > 0 ? "ml-1" : ""}
+          `}
         >
-          {/* Tree connector for child items */}
-          {level > 0 && (
-            <div className="absolute left-0 top-0 h-full">
-              <div className="absolute left-0 top-[1.1rem] w-3 h-[1px] bg-gray-300 dark:bg-gray-600" />
-            </div>
-          )}
-
-          <Link
-            href={item.route === "#" ? "" : item.route}
-            className="flex items-center px-2 pt-1"
+          <div
+            className={`flex items-center justify-center ${isExpanded ? "w-9 h-9 rounded-full" : "w-9 h-9 rounded-lg"} transition-colors duration-200 shrink-0
+            ${isActive ? "bg-brand-100 text-brand-700 dark:bg-brand-800 dark:text-brand-300" : "text-slate-500 group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-200"}`}
           >
-            <div
-              className={`px-2 mb-0.5 flex w-full rounded-md ${
-                isActive
-                  ? "bg-gray-200 dark:bg-gray-700 border-l-4 border-l-cyan-600"
-                  : ""
-              } ${isExpanded ? "justify-between py-1" : "justify-center py-2"}`}
+            <i className={`text-[13px] ${item.icon || ""}`} />
+          </div>
+          {isExpanded && (
+            <span
+              className={`text-[15px] font-medium transition-colors duration-200
+              ${isActive ? "text-slate-900 dark:text-white font-semibold" : "text-slate-600 group-hover:text-slate-900 dark:text-slate-300 dark:group-hover:text-white"}`}
             >
-              <div className="flex items-center min-w-0">
-                <i
-                  className={`text-base ${item.icon || ""} ${
-                    isActive ? "text-cyan-600" : "text-gray-600 dark:text-white"
-                  }`}
-                />
-                {isExpanded && (
-                  <span className="text-gray-600 dark:text-white text-base ml-3">
-                    {item.name}
-                  </span>
-                )}
-              </div>
-            </div>
-          </Link>
-        </div>
+              {item.name}
+            </span>
+          )}
+        </Link>
       )}
 
       {/* Parent menu item with children */}
       {!isLeafItem && (
         <div
-          className={`menu-item-parent px-2 pt-1 text-gray-600 dark:text-white text-base font-medium leading-normal cursor-pointer ${
-            isActive || hasActiveChild ? "rounded-md" : ""
-          } ${level > 0 ? "relative pl-4" : ""}`}
+          className={`group flex items-center gap-3 rounded-full mx-0 cursor-pointer transition-all duration-200
+            ${isExpanded ? "p-1.5 pr-4" : "px-0 py-2 justify-center"}
+            ${parentOpenClasses} ${hoverClasses}
+            ${level > 0 ? "ml-1" : ""}
+          `}
           onClick={() => handleClick(item)}
         >
-          {/* Tree connector for child items */}
-          {level > 0 && (
-            <div className="absolute left-0 top-0 h-full">
-              <div className="absolute left-0 top-[1.1rem] w-3 h-[1px] bg-gray-300 dark:bg-gray-600" />
-            </div>
-          )}
-
           <div
-            className={`px-2 mb-0.5 flex w-full rounded-md ${
-              item.is_open || isActive || hasActiveChild
-                ? "bg-gray-200 dark:bg-gray-700"
-                : ""
-            } ${isActive ? "border-l-4 border-l-cyan-600" : ""} ${
-              isExpanded ? "justify-between py-1" : "justify-center py-2"
-            }`}
+            className={`flex items-center justify-center ${isExpanded ? "w-10 h-10 rounded-full" : "w-9 h-9 rounded-lg"} transition-colors duration-200 shrink-0
+            ${isActive || hasActiveChild ? "bg-blue-500 text-white dark:bg-blue-600" : "bg-transparent text-slate-500 group-hover:bg-slate-100 dark:text-slate-400 dark:group-hover:bg-slate-700"}`}
           >
-            <div className="flex items-center min-w-0">
-              <i
-                className={`text-base ${item.icon || ""} ${
-                  isActive ? "text-cyan-600" : "text-gray-600 dark:text-white"
-                }`}
-              />
-              {isExpanded && (
-                <span className="text-gray-600 dark:text-white text-base ml-3">
-                  {item.name}
-                </span>
-              )}
-            </div>
-            {hasChildren && isExpanded && (
-              <span className="ml-auto pl-1">
-                <i
-                  className={
-                    item.is_open ? "fas fa-chevron-up" : "fas fa-chevron-down"
-                  }
-                />
-              </span>
-            )}
+            <i className={`text-[15px] ${item.icon || ""}`} />
           </div>
+          {isExpanded && (
+            <>
+              <span
+                className={`text-[16px] font-medium flex-1 transition-colors duration-200
+                ${isActive || hasActiveChild ? "text-slate-900 dark:text-white" : "text-slate-600 group-hover:text-slate-900 dark:text-slate-300 dark:group-hover:text-white"}`}
+              >
+                {item.name}
+              </span>
+              {hasChildren && (
+                <i
+                  className={`fas fa-chevron-down text-[10px] text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-400 transition-transform duration-200
+                    ${item.is_open ? "rotate-180" : "rotate-0"}`}
+                />
+              )}
+            </>
+          )}
         </div>
       )}
 
-      {/* Recursive children — expanded sidebar, tree view */}
+      {/* Recursive children — expanded sidebar */}
       {hasChildren && !!item.is_open && isExpanded && (
-        <div className="ml-3 relative pt-0 pb-0">
-          {/* Vertical line connecting all children */}
-          {item.child!.length > 0 && (
-            <div className="absolute left-0 top-0 w-px h-[calc(100%-0.6rem)] bg-gray-300 dark:bg-gray-600 z-1" />
-          )}
+        <div
+          className="ml-4 mt-0.5 relative border-l border-slate-200 dark:border-slate-700 overflow-hidden"
+          style={{
+            animation: "slideDown 0.2s ease-out",
+          }}
+        >
           {item.child!.map((child) => (
             <RecursiveMenuItem
               key={child.id || child.name}
@@ -223,7 +213,7 @@ export default function RecursiveMenuItem({
       {hasChildren && !isExpanded && !!item.is_open && !localIsMobile && (
         <div
           ref={dropdownRef}
-          className="fixed left-[70px] min-w-[220px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-[9999] p-2 overflow-y-auto"
+          className="fixed left-[70px] min-w-[220px] bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700/50 z-9999 p-2 overflow-y-auto backdrop-blur-xl"
           style={{ maxHeight: "70vh", top: `${dropdownTop}px` }}
           onMouseLeave={handleLinkClick}
         >
