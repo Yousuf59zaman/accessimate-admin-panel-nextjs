@@ -55,6 +55,10 @@ export default function AddEdit({ isOpen, item, modalTitle, onClose, onSave }: A
 
   return (
     <>
+
+      <ResponseModal data={responseModal as { status?: boolean; message?: string; error?: Record<string, string[]> }} onClose={() => setResponseModal({})} />
+
+      {isOpen && (
       <div className="fixed inset-0 z-9999 flex items-center justify-center">
         <div className="absolute inset-0 bg-black/50" onClick={onClose} />
         <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg mx-4 animate-modal-enter max-h-[90vh] overflow-y-auto">
@@ -84,7 +88,7 @@ export default function AddEdit({ isOpen, item, modalTitle, onClose, onSave }: A
           </div>
         </div>
       </div>
-      <ResponseModal data={responseModal as { status?: boolean; message?: string; error?: Record<string, string[]> }} onClose={() => setResponseModal({})} />
+      )}
     </>
   );
 }

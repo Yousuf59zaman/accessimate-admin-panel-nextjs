@@ -319,13 +319,24 @@ export default function AddEdit({
       setIsLoading(false);
     }
   };
-
-  if (!isOpen) return null;
   const inputClass = (field: string) =>
     `w-full border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sky-500 ${validationErrors[field] ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`;
 
   return (
     <>
+
+      <ResponseModal
+        data={
+          responseModal as {
+            status?: boolean;
+            message?: string;
+            error?: Record<string, string[]>;
+          }
+        }
+        onClose={() => setResponseModal({})}
+      />
+
+      {isOpen && (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center">
         <div className="absolute inset-0 bg-black/50" onClick={onClose} />
         <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl mx-4 animate-modal-enter max-h-[90vh] flex flex-col">
@@ -774,16 +785,7 @@ export default function AddEdit({
           </div>
         </div>
       </div>
-      <ResponseModal
-        data={
-          responseModal as {
-            status?: boolean;
-            message?: string;
-            error?: Record<string, string[]>;
-          }
-        }
-        onClose={() => setResponseModal({})}
-      />
+      )}
     </>
   );
 }

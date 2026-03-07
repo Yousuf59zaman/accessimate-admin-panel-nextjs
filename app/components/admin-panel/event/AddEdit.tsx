@@ -295,281 +295,292 @@ export default function AddEdit({
     setOpenDetails(false);
     setValidationErrors({});
   };
-
-  if (!isOpen) return null;
   const inputClass = (field: string) =>
     `w-full border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sky-500 ${validationErrors[field] ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`;
 
   return (
     <>
-      <div className="fixed inset-0 z-9999 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-        <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-5xl mx-4 animate-modal-enter max-h-[90vh] flex flex-col">
-          <div className="flex items-center justify-center w-full gap-2 p-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
-            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {modalTitle} Events
-            </h4>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-6 overflow-y-auto">
-            {/* Title & Slug */}
-            <div className="col-span-1 sm:col-span-2 flex items-center gap-4">
-              <div className="flex-auto">
-                <label className="font-semibold text-gray-900 dark:text-white">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => updateField("title", e.target.value)}
-                  placeholder="i.e. Event Title"
-                  className={inputClass("title")}
-                  autoComplete="off"
-                  onFocus={() =>
-                    setValidationErrors((prev) => ({ ...prev, title: "" }))
-                  }
-                />
-                {validationErrors.title && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {validationErrors.title}
-                  </p>
-                )}
-              </div>
-              <div className="flex-auto">
-                <label className="font-semibold text-gray-900 dark:text-white">
-                  Slug
-                </label>
-                <input
-                  type="text"
-                  value={formData.slug}
-                  onChange={(e) => updateField("slug", e.target.value)}
-                  placeholder="i.e. event-slug"
-                  className={inputClass("slug")}
-                  autoComplete="off"
-                  onFocus={() =>
-                    setValidationErrors((prev) => ({ ...prev, slug: "" }))
-                  }
-                />
-                {validationErrors.slug && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {validationErrors.slug}
-                  </p>
-                )}
-              </div>
+      <ResponseModal
+        data={
+          responseModal as {
+            status?: boolean;
+            message?: string;
+            error?: Record<string, string[]>;
+          }
+        }
+        onClose={() => setResponseModal({})}
+      />
+
+      {isOpen && (
+        <div className="fixed inset-0 z-9999 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+          <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-5xl mx-4 animate-modal-enter max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-center w-full gap-2 p-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
+              <h4 className="text-xl font-semibold text-gray-900 dark:text-white">
+                {modalTitle} Events
+              </h4>
             </div>
-            {/* Category */}
-            <div className="col-span-1 flex items-center gap-4">
-              <div className="flex-auto">
-                <label className="font-semibold text-gray-900 dark:text-white">
-                  Category
-                </label>
-                <select
-                  value={formData.category_id}
-                  onChange={(e) => updateField("category_id", e.target.value)}
-                  className={inputClass("category_id")}
-                  onFocus={() =>
-                    setValidationErrors((prev) => ({
-                      ...prev,
-                      category_id: "",
-                    }))
-                  }
-                >
-                  <option value="">Select</option>
-                  {categoryData.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.title}
-                    </option>
-                  ))}
-                </select>
-                {validationErrors.category_id && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {validationErrors.category_id}
-                  </p>
-                )}
-              </div>
-            </div>
-            {/* Description */}
-            <div className="col-span-1 sm:col-span-3 flex items-center gap-4">
-              <div className="flex-auto">
-                <label className="font-semibold text-gray-900 dark:text-white">
-                  Description
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => updateField("description", e.target.value)}
-                  placeholder="i.e. Event Description"
-                  className={inputClass("description")}
-                  rows={5}
-                  onFocus={() =>
-                    setValidationErrors((prev) => ({
-                      ...prev,
-                      description: "",
-                    }))
-                  }
-                />
-                {validationErrors.description && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {validationErrors.description}
-                  </p>
-                )}
-              </div>
-            </div>
-            {/* Status */}
-            <div className="col-span-1 flex items-end gap-4">
-              <label className="font-semibold w-14 mb-2 text-gray-900 dark:text-white">
-                Status
-              </label>
-              <div className="flex-auto">
-                <button
-                  type="button"
-                  onClick={() => setIsChecked(!isChecked)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isChecked ? "bg-sky-500" : "bg-gray-300 dark:bg-gray-600"}`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isChecked ? "translate-x-6" : "translate-x-1"}`}
-                  />
-                </button>
-              </div>
-            </div>
-            {/* Details Section */}
-            <div className="col-span-1 sm:col-span-3">
-              <div className="flex items-center justify-between gap-3 pb-2 mb-4 border-b border-gray-200 dark:border-gray-700">
-                <label className="font-semibold text-gray-900 dark:text-white">
-                  Details
-                </label>
-                <i
-                  onClick={addDetails}
-                  className="fa-solid fa-plus cursor-pointer bg-sky-200 dark:bg-sky-900 hover:dark:bg-sky-400 text-sky-500 dark:text-sky-200 hover:text-sky-800 p-2 text-[12px] h-[26px] w-[26px] flex items-center justify-center rounded-full"
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                {formData.details.map((d, index) => (
-                  <div
-                    key={index}
-                    className="rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md p-4 bg-white dark:bg-gray-900 relative group transition-all duration-300"
-                  >
-                    <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
-                      <button
-                        onClick={() => editDetails(index)}
-                        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                        title="Edit"
-                      >
-                        <i className="fas fa-edit text-emerald-600 text-sm" />
-                      </button>
-                      <button
-                        onClick={() => removeDetails(index)}
-                        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                        title="Delete"
-                      >
-                        <i className="fas fa-trash-alt text-red-600 text-sm" />
-                      </button>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/30">
-                          <i className="fas fa-calendar-alt text-indigo-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Year
-                          </p>
-                          <p className="font-semibold text-gray-900 dark:text-white">
-                            {yearData.find((y) => y.id === Number(d.year_id))
-                              ?.year || d.year_id}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
-                          <i className="fas fa-map-marker-alt text-emerald-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Venue
-                          </p>
-                          <p className="font-medium text-gray-800 dark:text-gray-200 line-clamp-2">
-                            {d.venue}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30">
-                          <i className="fas fa-hourglass-start text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Start Date
-                          </p>
-                          <p className="font-medium text-gray-800 dark:text-gray-200">
-                            {d.start_date}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/30">
-                          <i className="fas fa-hourglass-end text-purple-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            End Date
-                          </p>
-                          <p className="font-medium text-gray-800 dark:text-gray-200">
-                            {d.end_date}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status:
-                        </span>
-                        <span
-                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${d.status ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
-                        >
-                          {d.status ? "Active" : "Inactive"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-end items-center gap-3 p-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
-            {isLoading ? (
-              <button
-                disabled
-                className="px-6 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed flex items-center gap-2"
-              >
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 border border-red-500 text-red-500 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 hover:scale-105 flex items-center gap-2"
-                >
-                  <i className="pi pi-times-circle" />
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2"
-                >
-                  <i
-                    className={
-                      modalTitle === "Create"
-                        ? "pi pi-plus-circle"
-                        : "pi pi-refresh"
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-6 overflow-y-auto">
+              {/* Title & Slug */}
+              <div className="col-span-1 sm:col-span-2 flex items-center gap-4">
+                <div className="flex-auto">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => updateField("title", e.target.value)}
+                    placeholder="i.e. Event Title"
+                    className={inputClass("title")}
+                    autoComplete="off"
+                    onFocus={() =>
+                      setValidationErrors((prev) => ({ ...prev, title: "" }))
                     }
                   />
-                  {modalTitle === "Create" ? "Create" : "Update"}
+                  {validationErrors.title && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {validationErrors.title}
+                    </p>
+                  )}
+                </div>
+                <div className="flex-auto">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Slug
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.slug}
+                    onChange={(e) => updateField("slug", e.target.value)}
+                    placeholder="i.e. event-slug"
+                    className={inputClass("slug")}
+                    autoComplete="off"
+                    onFocus={() =>
+                      setValidationErrors((prev) => ({ ...prev, slug: "" }))
+                    }
+                  />
+                  {validationErrors.slug && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {validationErrors.slug}
+                    </p>
+                  )}
+                </div>
+              </div>
+              {/* Category */}
+              <div className="col-span-1 flex items-center gap-4">
+                <div className="flex-auto">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Category
+                  </label>
+                  <select
+                    value={formData.category_id}
+                    onChange={(e) => updateField("category_id", e.target.value)}
+                    className={inputClass("category_id")}
+                    onFocus={() =>
+                      setValidationErrors((prev) => ({
+                        ...prev,
+                        category_id: "",
+                      }))
+                    }
+                  >
+                    <option value="">Select</option>
+                    {categoryData.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.title}
+                      </option>
+                    ))}
+                  </select>
+                  {validationErrors.category_id && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {validationErrors.category_id}
+                    </p>
+                  )}
+                </div>
+              </div>
+              {/* Description */}
+              <div className="col-span-1 sm:col-span-3 flex items-center gap-4">
+                <div className="flex-auto">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Description
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => updateField("description", e.target.value)}
+                    placeholder="i.e. Event Description"
+                    className={inputClass("description")}
+                    rows={5}
+                    onFocus={() =>
+                      setValidationErrors((prev) => ({
+                        ...prev,
+                        description: "",
+                      }))
+                    }
+                  />
+                  {validationErrors.description && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {validationErrors.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+              {/* Status */}
+              <div className="col-span-1 flex items-end gap-4">
+                <label className="font-semibold w-14 mb-2 text-gray-900 dark:text-white">
+                  Status
+                </label>
+                <div className="flex-auto">
+                  <button
+                    type="button"
+                    onClick={() => setIsChecked(!isChecked)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isChecked ? "bg-sky-500" : "bg-gray-300 dark:bg-gray-600"}`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isChecked ? "translate-x-6" : "translate-x-1"}`}
+                    />
+                  </button>
+                </div>
+              </div>
+              {/* Details Section */}
+              <div className="col-span-1 sm:col-span-3">
+                <div className="flex items-center justify-between gap-3 pb-2 mb-4 border-b border-gray-200 dark:border-gray-700">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Details
+                  </label>
+                  <i
+                    onClick={addDetails}
+                    className="fa-solid fa-plus cursor-pointer bg-sky-200 dark:bg-sky-900 hover:dark:bg-sky-400 text-sky-500 dark:text-sky-200 hover:text-sky-800 p-2 text-[12px] h-[26px] w-[26px] flex items-center justify-center rounded-full"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                  {formData.details.map((d, index) => (
+                    <div
+                      key={index}
+                      className="rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md p-4 bg-white dark:bg-gray-900 relative group transition-all duration-300"
+                    >
+                      <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+                        <button
+                          onClick={() => editDetails(index)}
+                          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                          title="Edit"
+                        >
+                          <i className="fas fa-edit text-emerald-600 text-sm" />
+                        </button>
+                        <button
+                          onClick={() => removeDetails(index)}
+                          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                          title="Delete"
+                        >
+                          <i className="fas fa-trash-alt text-red-600 text-sm" />
+                        </button>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/30">
+                            <i className="fas fa-calendar-alt text-indigo-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Year
+                            </p>
+                            <p className="font-semibold text-gray-900 dark:text-white">
+                              {yearData.find((y) => y.id === Number(d.year_id))
+                                ?.year || d.year_id}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
+                            <i className="fas fa-map-marker-alt text-emerald-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Venue
+                            </p>
+                            <p className="font-medium text-gray-800 dark:text-gray-200 line-clamp-2">
+                              {d.venue}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30">
+                            <i className="fas fa-hourglass-start text-blue-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Start Date
+                            </p>
+                            <p className="font-medium text-gray-800 dark:text-gray-200">
+                              {d.start_date}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/30">
+                            <i className="fas fa-hourglass-end text-purple-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              End Date
+                            </p>
+                            <p className="font-medium text-gray-800 dark:text-gray-200">
+                              {d.end_date}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+                          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status:
+                          </span>
+                          <span
+                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${d.status ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
+                          >
+                            {d.status ? "Active" : "Inactive"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end items-center gap-3 p-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
+              {isLoading ? (
+                <button
+                  disabled
+                  className="px-6 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed flex items-center gap-2"
+                >
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 </button>
-              </>
-            )}
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-4 py-2 border border-red-500 text-red-500 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                  >
+                    <i className="pi pi-times-circle" />
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2"
+                  >
+                    <i
+                      className={
+                        modalTitle === "Create"
+                          ? "pi pi-plus-circle"
+                          : "pi pi-refresh"
+                      }
+                    />
+                    {modalTitle === "Create" ? "Create" : "Update"}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
       {/* Details Drawer */}
       {openDetails && (
         <div className="fixed inset-0 z-[10000] flex justify-end">
@@ -714,16 +725,6 @@ export default function AddEdit({
           </div>
         </div>
       )}
-      <ResponseModal
-        data={
-          responseModal as {
-            status?: boolean;
-            message?: string;
-            error?: Record<string, string[]>;
-          }
-        }
-        onClose={() => setResponseModal({})}
-      />
     </>
   );
 }

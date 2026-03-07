@@ -328,8 +328,6 @@ export default function AddEdit({
 
   // ─── Don't render when closed ──────────────────────────
 
-  if (!isOpen) return null;
-
   // ─── Input helper ──────────────────────────────────────
 
   const inputClass = (field: string) =>
@@ -341,349 +339,359 @@ export default function AddEdit({
 
   return (
     <>
-      {/* Backdrop */}
-      <div className="fixed inset-0 z-9999 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <div className="fixed inset-0 z-9999 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
-        {/* Dialog */}
-        <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl mx-4 animate-modal-enter max-h-[90vh] overflow-y-auto">
-          {/* Header */}
-          <div className="flex items-center justify-center w-full gap-2 p-4 border-b border-gray-200 dark:border-gray-700">
-            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {modalTitle} User
-            </h4>
-          </div>
+            {/* Dialog */}
+            <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl mx-4 animate-modal-enter max-h-[90vh] overflow-y-auto">
+              {/* Header */}
+              <div className="flex items-center justify-center w-full gap-2 p-4 border-b border-gray-200 dark:border-gray-700">
+                <h4 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  {modalTitle} User
+                </h4>
+              </div>
 
-          {/* Form */}
-          <form className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-6">
-            {/* Photo upload placeholder */}
-            <div className="col-span-1 sm:col-span-3 flex items-center gap-4">
-              <div className="flex-auto">
-                <label className="font-semibold text-gray-900 dark:text-white">
-                  Upload Profile Image
-                </label>
-                <div className="w-64 mt-2">
-                  {formData.photo ? (
-                    <img
-                      src={formData.photo}
-                      alt="Profile"
-                      className="w-24 h-24 object-cover rounded-md"
-                    />
-                  ) : (
-                    <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-center text-gray-400">
-                      <i className="fa fa-camera text-2xl" />
+              {/* Form */}
+              <form className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-6">
+                {/* Photo upload placeholder */}
+                <div className="col-span-1 sm:col-span-3 flex items-center gap-4">
+                  <div className="flex-auto">
+                    <label className="font-semibold text-gray-900 dark:text-white">
+                      Upload Profile Image
+                    </label>
+                    <div className="w-64 mt-2">
+                      {formData.photo ? (
+                        <img
+                          src={formData.photo}
+                          alt="Profile"
+                          className="w-24 h-24 object-cover rounded-md"
+                        />
+                      ) : (
+                        <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-center text-gray-400">
+                          <i className="fa fa-camera text-2xl" />
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="mt-2 text-sm text-gray-600 dark:text-gray-400"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              updateField("photo", ev.target?.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
                     </div>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="mt-2 text-sm text-gray-600 dark:text-gray-400"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                          updateField("photo", ev.target?.result as string);
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                  />
+                    {validationErrors.photo && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {validationErrors.photo}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                {validationErrors.photo && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {validationErrors.photo}
-                  </p>
+
+                {/* First Name */}
+                <div className="flex flex-col gap-1">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.first_name}
+                    onChange={(e) => updateField("first_name", e.target.value)}
+                    placeholder="i.e. John"
+                    className={inputClass("first_name")}
+                    autoComplete="off"
+                  />
+                  {validationErrors.first_name && (
+                    <p className="text-red-500 text-sm">
+                      {validationErrors.first_name}
+                    </p>
+                  )}
+                </div>
+
+                {/* Middle Name */}
+                <div className="flex flex-col gap-1">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Middle Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.middle_name}
+                    onChange={(e) => updateField("middle_name", e.target.value)}
+                    placeholder="i.e. Doe"
+                    className={inputClass("middle_name")}
+                    autoComplete="off"
+                  />
+                  {validationErrors.middle_name && (
+                    <p className="text-red-500 text-sm">
+                      {validationErrors.middle_name}
+                    </p>
+                  )}
+                </div>
+
+                {/* Last Name */}
+                <div className="flex flex-col gap-1">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.last_name}
+                    onChange={(e) => updateField("last_name", e.target.value)}
+                    placeholder="i.e. Smith"
+                    className={inputClass("last_name")}
+                    autoComplete="off"
+                  />
+                  {validationErrors.last_name && (
+                    <p className="text-red-500 text-sm">
+                      {validationErrors.last_name}
+                    </p>
+                  )}
+                </div>
+
+                {/* Date of Birth */}
+                <div className="flex flex-col gap-1">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.dob}
+                    onChange={(e) => updateField("dob", e.target.value)}
+                    className={inputClass("dob")}
+                    autoComplete="off"
+                  />
+                  {validationErrors.dob && (
+                    <p className="text-red-500 text-sm">
+                      {validationErrors.dob}
+                    </p>
+                  )}
+                </div>
+
+                {/* Gender */}
+                <div className="flex flex-col gap-1">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Gender
+                  </label>
+                  <select
+                    value={formData.gender}
+                    onChange={(e) => updateField("gender", e.target.value)}
+                    className={inputClass("gender")}
+                  >
+                    <option value="">Select Gender</option>
+                    {genderList.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.gender_name}
+                      </option>
+                    ))}
+                  </select>
+                  {validationErrors.gender && (
+                    <p className="text-red-500 text-sm">
+                      {validationErrors.gender}
+                    </p>
+                  )}
+                </div>
+
+                {/* Nationality */}
+                <div className="flex flex-col gap-1">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Nationality
+                  </label>
+                  <select
+                    value={formData.nationality_id}
+                    onChange={(e) =>
+                      updateField("nationality_id", e.target.value)
+                    }
+                    className={inputClass("nationality_id")}
+                  >
+                    <option value="">Select Nationality</option>
+                    {nationalityList.map((n) => (
+                      <option key={n.id} value={n.id}>
+                        {n.nationality}
+                      </option>
+                    ))}
+                  </select>
+                  {validationErrors.nationality_id && (
+                    <p className="text-red-500 text-sm">
+                      {validationErrors.nationality_id}
+                    </p>
+                  )}
+                </div>
+
+                {/* Email — spans 2 columns */}
+                <div className="col-span-1 sm:col-span-2 flex flex-col gap-1">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => updateField("email", e.target.value)}
+                    placeholder="i.e. john@example.com"
+                    className={inputClass("email")}
+                    autoComplete="username"
+                  />
+                  {validationErrors.email && (
+                    <p className="text-red-500 text-sm">
+                      {validationErrors.email}
+                    </p>
+                  )}
+                </div>
+
+                {/* Mobile */}
+                <div className="col-span-1 flex flex-col gap-1">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Mobile
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.mobile}
+                    onChange={(e) => updateField("mobile", e.target.value)}
+                    placeholder="i.e. 1234567890"
+                    className={inputClass("mobile")}
+                    autoComplete="off"
+                  />
+                  {validationErrors.mobile && (
+                    <p className="text-red-500 text-sm">
+                      {validationErrors.mobile}
+                    </p>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div className="flex flex-col gap-1">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => updateField("password", e.target.value)}
+                    className={inputClass("password")}
+                    autoComplete="new-password"
+                  />
+                  {validationErrors.password && (
+                    <p className="text-red-500 text-sm">
+                      {validationErrors.password}
+                    </p>
+                  )}
+                </div>
+
+                {/* Confirm Password */}
+                <div className="flex flex-col gap-1">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.password_confirmation}
+                    onChange={(e) =>
+                      updateField("password_confirmation", e.target.value)
+                    }
+                    className={inputClass("password_confirmation")}
+                    autoComplete="new-password"
+                  />
+                  {validationErrors.password_confirmation && (
+                    <p className="text-red-500 text-sm">
+                      {validationErrors.password_confirmation}
+                    </p>
+                  )}
+                </div>
+
+                {/* User Type */}
+                <div className="flex flex-col gap-1">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    User Type
+                  </label>
+                  <select
+                    value={formData.user_type}
+                    onChange={(e) => updateField("user_type", e.target.value)}
+                    className={inputClass("user_type")}
+                  >
+                    <option value="">Select User Type</option>
+                    {roleList.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.role_name}
+                      </option>
+                    ))}
+                  </select>
+                  {validationErrors.user_type && (
+                    <p className="text-red-500 text-sm">
+                      {validationErrors.user_type}
+                    </p>
+                  )}
+                </div>
+
+                {/* Status Toggle */}
+                <div className="flex items-center gap-4">
+                  <label className="font-semibold text-gray-900 dark:text-white">
+                    Status
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsChecked(!isChecked)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      isChecked ? "bg-sky-500" : "bg-gray-300 dark:bg-gray-600"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        isChecked ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+              </form>
+
+              {/* Footer */}
+              <div className="flex justify-end items-center gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
+                {isLoading ? (
+                  <button
+                    disabled
+                    className="px-6 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed flex items-center gap-2"
+                  >
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="px-4 py-2 border border-red-500 text-red-500 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                    >
+                      <i className="pi pi-times-circle" />
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2"
+                    >
+                      <i
+                        className={
+                          modalTitle === "Create"
+                            ? "pi pi-plus-circle"
+                            : "pi pi-refresh"
+                        }
+                      />
+                      {modalTitle === "Create" ? "Create" : "Update"}
+                    </button>
+                  </>
                 )}
               </div>
             </div>
-
-            {/* First Name */}
-            <div className="flex flex-col gap-1">
-              <label className="font-semibold text-gray-900 dark:text-white">
-                First Name
-              </label>
-              <input
-                type="text"
-                value={formData.first_name}
-                onChange={(e) => updateField("first_name", e.target.value)}
-                placeholder="i.e. John"
-                className={inputClass("first_name")}
-                autoComplete="off"
-              />
-              {validationErrors.first_name && (
-                <p className="text-red-500 text-sm">
-                  {validationErrors.first_name}
-                </p>
-              )}
-            </div>
-
-            {/* Middle Name */}
-            <div className="flex flex-col gap-1">
-              <label className="font-semibold text-gray-900 dark:text-white">
-                Middle Name
-              </label>
-              <input
-                type="text"
-                value={formData.middle_name}
-                onChange={(e) => updateField("middle_name", e.target.value)}
-                placeholder="i.e. Doe"
-                className={inputClass("middle_name")}
-                autoComplete="off"
-              />
-              {validationErrors.middle_name && (
-                <p className="text-red-500 text-sm">
-                  {validationErrors.middle_name}
-                </p>
-              )}
-            </div>
-
-            {/* Last Name */}
-            <div className="flex flex-col gap-1">
-              <label className="font-semibold text-gray-900 dark:text-white">
-                Last Name
-              </label>
-              <input
-                type="text"
-                value={formData.last_name}
-                onChange={(e) => updateField("last_name", e.target.value)}
-                placeholder="i.e. Smith"
-                className={inputClass("last_name")}
-                autoComplete="off"
-              />
-              {validationErrors.last_name && (
-                <p className="text-red-500 text-sm">
-                  {validationErrors.last_name}
-                </p>
-              )}
-            </div>
-
-            {/* Date of Birth */}
-            <div className="flex flex-col gap-1">
-              <label className="font-semibold text-gray-900 dark:text-white">
-                Date of Birth
-              </label>
-              <input
-                type="date"
-                value={formData.dob}
-                onChange={(e) => updateField("dob", e.target.value)}
-                className={inputClass("dob")}
-                autoComplete="off"
-              />
-              {validationErrors.dob && (
-                <p className="text-red-500 text-sm">{validationErrors.dob}</p>
-              )}
-            </div>
-
-            {/* Gender */}
-            <div className="flex flex-col gap-1">
-              <label className="font-semibold text-gray-900 dark:text-white">
-                Gender
-              </label>
-              <select
-                value={formData.gender}
-                onChange={(e) => updateField("gender", e.target.value)}
-                className={inputClass("gender")}
-              >
-                <option value="">Select Gender</option>
-                {genderList.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.gender_name}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.gender && (
-                <p className="text-red-500 text-sm">
-                  {validationErrors.gender}
-                </p>
-              )}
-            </div>
-
-            {/* Nationality */}
-            <div className="flex flex-col gap-1">
-              <label className="font-semibold text-gray-900 dark:text-white">
-                Nationality
-              </label>
-              <select
-                value={formData.nationality_id}
-                onChange={(e) => updateField("nationality_id", e.target.value)}
-                className={inputClass("nationality_id")}
-              >
-                <option value="">Select Nationality</option>
-                {nationalityList.map((n) => (
-                  <option key={n.id} value={n.id}>
-                    {n.nationality}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.nationality_id && (
-                <p className="text-red-500 text-sm">
-                  {validationErrors.nationality_id}
-                </p>
-              )}
-            </div>
-
-            {/* Email — spans 2 columns */}
-            <div className="col-span-1 sm:col-span-2 flex flex-col gap-1">
-              <label className="font-semibold text-gray-900 dark:text-white">
-                Email
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => updateField("email", e.target.value)}
-                placeholder="i.e. john@example.com"
-                className={inputClass("email")}
-                autoComplete="username"
-              />
-              {validationErrors.email && (
-                <p className="text-red-500 text-sm">{validationErrors.email}</p>
-              )}
-            </div>
-
-            {/* Mobile */}
-            <div className="col-span-1 flex flex-col gap-1">
-              <label className="font-semibold text-gray-900 dark:text-white">
-                Mobile
-              </label>
-              <input
-                type="number"
-                value={formData.mobile}
-                onChange={(e) => updateField("mobile", e.target.value)}
-                placeholder="i.e. 1234567890"
-                className={inputClass("mobile")}
-                autoComplete="off"
-              />
-              {validationErrors.mobile && (
-                <p className="text-red-500 text-sm">
-                  {validationErrors.mobile}
-                </p>
-              )}
-            </div>
-
-            {/* Password */}
-            <div className="flex flex-col gap-1">
-              <label className="font-semibold text-gray-900 dark:text-white">
-                Password
-              </label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => updateField("password", e.target.value)}
-                className={inputClass("password")}
-                autoComplete="new-password"
-              />
-              {validationErrors.password && (
-                <p className="text-red-500 text-sm">
-                  {validationErrors.password}
-                </p>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div className="flex flex-col gap-1">
-              <label className="font-semibold text-gray-900 dark:text-white">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                value={formData.password_confirmation}
-                onChange={(e) =>
-                  updateField("password_confirmation", e.target.value)
-                }
-                className={inputClass("password_confirmation")}
-                autoComplete="new-password"
-              />
-              {validationErrors.password_confirmation && (
-                <p className="text-red-500 text-sm">
-                  {validationErrors.password_confirmation}
-                </p>
-              )}
-            </div>
-
-            {/* User Type */}
-            <div className="flex flex-col gap-1">
-              <label className="font-semibold text-gray-900 dark:text-white">
-                User Type
-              </label>
-              <select
-                value={formData.user_type}
-                onChange={(e) => updateField("user_type", e.target.value)}
-                className={inputClass("user_type")}
-              >
-                <option value="">Select User Type</option>
-                {roleList.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.role_name}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.user_type && (
-                <p className="text-red-500 text-sm">
-                  {validationErrors.user_type}
-                </p>
-              )}
-            </div>
-
-            {/* Status Toggle */}
-            <div className="flex items-center gap-4">
-              <label className="font-semibold text-gray-900 dark:text-white">
-                Status
-              </label>
-              <button
-                type="button"
-                onClick={() => setIsChecked(!isChecked)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  isChecked ? "bg-sky-500" : "bg-gray-300 dark:bg-gray-600"
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    isChecked ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
-            </div>
-          </form>
-
-          {/* Footer */}
-          <div className="flex justify-end items-center gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
-            {isLoading ? (
-              <button
-                disabled
-                className="px-6 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed flex items-center gap-2"
-              >
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 border border-red-500 text-red-500 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 hover:scale-105 flex items-center gap-2"
-                >
-                  <i className="pi pi-times-circle" />
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2"
-                >
-                  <i
-                    className={
-                      modalTitle === "Create"
-                        ? "pi pi-plus-circle"
-                        : "pi pi-refresh"
-                    }
-                  />
-                  {modalTitle === "Create" ? "Create" : "Update"}
-                </button>
-              </>
-            )}
           </div>
-        </div>
-      </div>
+        </>
+      )}
 
       {/* Response Modal */}
       <ResponseModal
