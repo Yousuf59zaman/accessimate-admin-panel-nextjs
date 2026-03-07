@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
-import { useCrudPage } from "@/app/hooks/useCrudPage";
+import { useAdminCrud } from "@/app/hooks/useAdminCrud";
 import { optionsListAcIn } from "@/app/helpers/globalFunctions";
 import Pagination from "@/app/components/ui/Pagination";
 import ConfirmModal from "@/app/components/ui/ConfirmModal";
@@ -49,7 +49,7 @@ function UsersPageInner() {
     handleRestore,
     handleAfterSave,
     resetPagination,
-  } = useCrudPage<User>({
+  } = useAdminCrud<User>({
     apiEndpoint: "admin/users/all",
     apiBase: "admin/users",
     pageSize: 10,

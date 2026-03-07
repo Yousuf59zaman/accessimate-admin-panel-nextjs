@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useState } from "react";
 import Image from "next/image";
-import { useCrudPage } from "@/app/hooks/useCrudPage";
+import { useAdminCrud } from "@/app/hooks/useAdminCrud";
 import { optionsList } from "@/app/helpers/globalFunctions";
 import Pagination from "@/app/components/ui/Pagination";
 import ConfirmModal from "@/app/components/ui/ConfirmModal";
@@ -13,7 +13,7 @@ interface ComplianceItem { id: number; title: string; slug: string; description?
 
 function CompliancePageInner() {
   const options = optionsList();
-  const { data, isLoading, permissions, paginationMeta, search, setSearch, status, setStatus, loadData, handleDelete, handleRestore, handleAfterSave, resetPagination } = useCrudPage<ComplianceItem>({ apiEndpoint: "admin/compliances/all", apiBase: "admin/compliances", pageSize: 10 });
+  const { data, isLoading, permissions, paginationMeta, search, setSearch, status, setStatus, loadData, handleDelete, handleRestore, handleAfterSave, resetPagination } = useAdminCrud<ComplianceItem>({ apiEndpoint: "admin/compliances/all", apiBase: "admin/compliances", pageSize: 10 });
 
   const [searchInput, setSearchInput] = useState(search);
   const onSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => { const val = e.target.value; setSearchInput(val); setSearch(val); }, [setSearch]);

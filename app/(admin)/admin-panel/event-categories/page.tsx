@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
-import { useCrudPage } from "@/app/hooks/useCrudPage";
+import { useAdminCrud } from "@/app/hooks/useAdminCrud";
 import { optionsList as optionsListFn } from "@/app/helpers/globalFunctions";
 import Pagination from "@/app/components/ui/Pagination";
 import ConfirmModal from "@/app/components/ui/ConfirmModal";
@@ -33,7 +33,7 @@ function EventCategoriesPageInner() {
     handleRestore,
     handleAfterSave,
     resetPagination,
-  } = useCrudPage<EventCategory>({
+  } = useAdminCrud<EventCategory>({
     apiEndpoint: "admin/event-categories/all",
     apiBase: "admin/event-categories",
     pageSize: 10,

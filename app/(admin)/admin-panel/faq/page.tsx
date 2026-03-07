@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
-import { useCrudPage } from "@/app/hooks/useCrudPage";
+import { useAdminCrud } from "@/app/hooks/useAdminCrud";
 import {
   optionsList as optionsListFn,
   typetList,
@@ -42,7 +42,7 @@ function FaqPageInner() {
     handleRestore,
     handleAfterSave,
     resetPagination,
-  } = useCrudPage<FaqItem>({
+  } = useAdminCrud<FaqItem>({
     apiEndpoint: "admin/faqs/all",
     apiBase: "admin/faqs",
     pageSize: 10,

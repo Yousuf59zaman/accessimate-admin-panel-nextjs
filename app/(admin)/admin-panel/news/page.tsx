@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
-import { useCrudPage } from "@/app/hooks/useCrudPage";
+import { useAdminCrud } from "@/app/hooks/useAdminCrud";
 import {
   optionsList as optionsListFn,
   typetList,
@@ -42,7 +42,7 @@ function NewsPageInner() {
     handleRestore,
     handleAfterSave,
     resetPagination,
-  } = useCrudPage<NewsItem>({
+  } = useAdminCrud<NewsItem>({
     apiEndpoint: "admin/news/all",
     apiBase: "admin/news",
     pageSize: 10,

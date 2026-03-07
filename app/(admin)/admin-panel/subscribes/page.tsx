@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
-import { useCrudPage } from "@/app/hooks/useCrudPage";
+import { useAdminCrud } from "@/app/hooks/useAdminCrud";
 import { optionsListAcIn, viewFormatDate } from "@/app/helpers/globalFunctions";
 import Pagination from "@/app/components/ui/Pagination";
 import ResponseModal from "@/app/components/ui/ResponseModal";
@@ -27,7 +27,7 @@ function SubscribesPageInner() {
     setStatus,
     loadData,
     resetPagination,
-  } = useCrudPage<Subscribe>({
+  } = useAdminCrud<Subscribe>({
     apiEndpoint: "admin/subscribes/all",
     apiBase: "admin/subscribes",
     pageSize: 10,

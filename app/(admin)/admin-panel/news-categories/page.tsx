@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
-import { useCrudPage } from "@/app/hooks/useCrudPage";
+import { useAdminCrud } from "@/app/hooks/useAdminCrud";
 import { optionsList as optionsListFn } from "@/app/helpers/globalFunctions";
 import Pagination from "@/app/components/ui/Pagination";
 import ConfirmModal from "@/app/components/ui/ConfirmModal";
@@ -33,7 +33,7 @@ function NewsCategoriesPageInner() {
     handleRestore,
     handleAfterSave,
     resetPagination,
-  } = useCrudPage<NewsCategory>({
+  } = useAdminCrud<NewsCategory>({
     apiEndpoint: "admin/news-categories/all",
     apiBase: "admin/news-categories",
     pageSize: 10,

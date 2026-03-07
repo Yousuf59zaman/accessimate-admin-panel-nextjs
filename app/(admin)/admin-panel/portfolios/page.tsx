@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useState, useEffect, useMemo } from "react";
-import { useCrudPage } from "@/app/hooks/useCrudPage";
+import { useAdminCrud } from "@/app/hooks/useAdminCrud";
 import { optionsList as optionsListFn } from "@/app/helpers/globalFunctions";
 import Pagination from "@/app/components/ui/Pagination";
 import ConfirmModal from "@/app/components/ui/ConfirmModal";
@@ -49,7 +49,7 @@ function PortfoliosPageInner() {
     handleRestore,
     handleAfterSave,
     resetPagination,
-  } = useCrudPage<PortfolioItem>({
+  } = useAdminCrud<PortfolioItem>({
     apiEndpoint: "admin/portfolios/all",
     apiBase: "admin/portfolios",
     pageSize: 10,

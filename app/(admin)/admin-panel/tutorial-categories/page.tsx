@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
-import { useCrudPage } from "@/app/hooks/useCrudPage";
+import { useAdminCrud } from "@/app/hooks/useAdminCrud";
 import { optionsList as optionsListFn } from "@/app/helpers/globalFunctions";
 import Pagination from "@/app/components/ui/Pagination";
 import ConfirmModal from "@/app/components/ui/ConfirmModal";
@@ -33,7 +33,7 @@ function TutorialCategoriesPageInner() {
     handleRestore,
     handleAfterSave,
     resetPagination,
-  } = useCrudPage<TutorialCategory>({
+  } = useAdminCrud<TutorialCategory>({
     apiEndpoint: "admin/tutorial-categories/all",
     apiBase: "admin/tutorial-categories",
     pageSize: 10,

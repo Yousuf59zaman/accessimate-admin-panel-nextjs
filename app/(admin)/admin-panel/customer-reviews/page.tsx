@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
-import { useCrudPage } from "@/app/hooks/useCrudPage";
+import { useAdminCrud } from "@/app/hooks/useAdminCrud";
 import {
   optionsList as optionsListFn,
   truncateText,
@@ -37,7 +37,7 @@ function CustomerReviewsPageInner() {
     handleRestore,
     handleAfterSave,
     resetPagination,
-  } = useCrudPage<CustomerReview>({
+  } = useAdminCrud<CustomerReview>({
     apiEndpoint: "admin/customer-reviews/all",
     apiBase: "admin/customer-reviews",
     pageSize: 10,

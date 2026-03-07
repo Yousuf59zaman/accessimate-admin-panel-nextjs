@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
-import { useCrudPage } from "@/app/hooks/useCrudPage";
+import { useAdminCrud } from "@/app/hooks/useAdminCrud";
 import { optionsAcTr } from "@/app/helpers/globalFunctions";
 import Pagination from "@/app/components/ui/Pagination";
 import ConfirmModal from "@/app/components/ui/ConfirmModal";
@@ -31,7 +31,7 @@ function CmsAuthClientPageInner() {
     handleRestore,
     handleAfterSave,
     resetPagination,
-  } = useCrudPage<CmsAuthClient>({
+  } = useAdminCrud<CmsAuthClient>({
     apiEndpoint: "admin/auth-client/all",
     apiBase: "admin/auth-client",
     pageSize: 10,

@@ -49,7 +49,7 @@ interface FetchError {
   };
 }
 
-interface UseCrudPageOptions {
+interface UseAdminCrudOptions {
   /** API endpoint for listing, e.g. 'admin/users/all' */
   apiEndpoint: string;
   /** API base for delete/restore, e.g. 'admin/users' */
@@ -65,7 +65,7 @@ interface CrudActionResult {
   response: Record<string, unknown>;
 }
 
-interface UseCrudPageReturn<T> {
+interface UseAdminCrudReturn<T> {
   data: T[];
   setData: React.Dispatch<React.SetStateAction<T[]>>;
   isLoading: boolean;
@@ -84,9 +84,9 @@ interface UseCrudPageReturn<T> {
 
 // ─── Hook ───────────────────────────────────────────────────
 
-export function useCrudPage<T extends { id: number | string }>(
-  options: UseCrudPageOptions
-): UseCrudPageReturn<T> {
+export function useAdminCrud<T extends { id: number | string }>(
+  options: UseAdminCrudOptions
+): UseAdminCrudReturn<T> {
   const { apiEndpoint, apiBase, pageSize = 10, initialStatus } = options;
 
   const searchParams = useSearchParams();

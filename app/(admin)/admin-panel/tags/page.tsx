@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
-import { useCrudPage } from "@/app/hooks/useCrudPage";
+import { useAdminCrud } from "@/app/hooks/useAdminCrud";
 import { optionsList as optionsListFn } from "@/app/helpers/globalFunctions";
 import Pagination from "@/app/components/ui/Pagination";
 import ConfirmModal from "@/app/components/ui/ConfirmModal";
@@ -35,7 +35,7 @@ function TagsPageInner() {
     handleRestore,
     handleAfterSave,
     resetPagination,
-  } = useCrudPage<Tag>({
+  } = useAdminCrud<Tag>({
     apiEndpoint: "admin/tags/all",
     apiBase: "admin/tags",
     pageSize: 10,
