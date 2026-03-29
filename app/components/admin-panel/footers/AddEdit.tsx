@@ -258,12 +258,22 @@ export default function AddEdit({
       setIsLoading(false);
     }
   };
-  const inputClass = (field: string) =>
-    `w-full border rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sky-500 ${validationErrors[field] ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`;
+  const isEditMode = modalTitle !== "Create";
+  const isExternal = Number(formData.link_type) === 2;
+  const slugPrefix = isExternal ? `${CONTENT_PREFIX}/` : "/";
+
+  const fieldLabelClass =
+    "px-1 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400";
+  const fieldClass = (field: string) =>
+    `w-full rounded-xl border bg-slate-50/90 dark:bg-slate-900/70 px-4 py-3.5 text-sm font-medium text-slate-900 dark:text-slate-100 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-[#025ADB]/25 focus:ring-4 focus:ring-[#025ADB]/10 ${
+      validationErrors[field]
+        ? "border-red-400/80 focus:border-red-400 focus:ring-red-500/10"
+        : "border-slate-200/80 dark:border-slate-700/70"
+    }`;
+  const helperTextClass = "mt-2 px-1 text-xs text-red-500";
 
   return (
     <>
-
       <ResponseModal
         data={
           responseModal as {
@@ -276,200 +286,262 @@ export default function AddEdit({
       />
 
       {isOpen && (
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-        <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl mx-4 animate-modal-enter max-h-[90vh] flex flex-col">
-          <div className="flex items-center justify-center w-full gap-2 p-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
-            <h4 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {modalTitle} Footer
-            </h4>
-          </div>
-          <div className="p-6 overflow-y-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="col-span-1">
-                <label className="font-semibold block mb-1 text-gray-900 dark:text-white">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => updateField("title", e.target.value)}
-                  placeholder="i.e. Example Tag"
-                  className={inputClass("title")}
-                  autoComplete="off"
-                  onFocus={() =>
-                    setValidationErrors((prev) => ({ ...prev, title: "" }))
-                  }
-                />
-                {validationErrors.title && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {validationErrors.title}
-                  </p>
-                )}
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
+          <div
+            className="absolute inset-0 bg-slate-950/45 backdrop-blur-sm"
+            onClick={onClose}
+          />
+
+          <div className="relative z-10 flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[2rem] border border-white/60 bg-white/95 shadow-[0_32px_80px_rgba(15,23,42,0.18)] backdrop-blur-xl dark:border-slate-700/60 dark:bg-slate-900/95">
+            <div className="flex items-start justify-between gap-4 border-b border-slate-200/60 px-6 py-6 sm:px-8 dark:border-slate-800/80">
+              <div>
+                <h4 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
+                  {isEditMode ? "Edit Footer Link" : "Create Footer Link"}
+                </h4>
+                <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
+                  {isEditMode
+                    ? "Refine this navigation point for your site structure."
+                    : "Define a new navigation point for your site structure."}
+                </p>
               </div>
 
-              <div className="col-span-1">
-                <label className="font-semibold block mb-1 text-gray-900 dark:text-white">
-                  Group Type
-                </label>
-                {isLoadingGroupTypes ? (
-                  <div className="w-full h-[38px] bg-white dark:bg-gray-700 rounded-md animate-pulse flex items-center px-3 border border-gray-300 dark:border-gray-600">
-                    <div className="w-24 h-4 bg-gray-200 dark:bg-gray-600 rounded"></div>
-                  </div>
-                ) : (
-                  <select
-                    value={formData.group_type_id?.toString() || ""}
-                    onChange={(e) =>
-                      updateField("group_type_id", e.target.value)
-                    }
-                    className={inputClass("group_type_id")}
-                    onFocus={() =>
-                      setValidationErrors((prev) => ({
-                        ...prev,
-                        group_type_id: "",
-                      }))
-                    }
-                  >
-                    <option value="">Select Group Type</option>
-                    {footerGroupTypes.map((gt) => (
-                      <option key={gt.id} value={gt.id.toString()}>
-                        {gt.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                {validationErrors.group_type_id && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {validationErrors.group_type_id}
-                  </p>
-                )}
-              </div>
-
-              <div className="col-span-1">
-                <label className="font-semibold block mb-1 text-gray-900 dark:text-white">
-                  Link Type
-                </label>
-                <select
-                  value={formData.link_type?.toString() || ""}
-                  onChange={(e) => updateField("link_type", e.target.value)}
-                  className={inputClass("link_type")}
-                  onFocus={() =>
-                    setValidationErrors((prev) => ({ ...prev, link_type: "" }))
-                  }
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close footer modal"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  className="h-5 w-5"
+                  aria-hidden="true"
                 >
-                  <option value="">Select Link Type</option>
-                  {linkTypeOptions.map((lt) => (
-                    <option key={lt.value} value={lt.value}>
-                      {lt.name}
-                    </option>
-                  ))}
-                </select>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 6l12 12M18 6L6 18"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-7 overflow-y-auto px-6 py-6 sm:px-8">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div className="space-y-2.5">
+                  <label htmlFor="footer-title" className={fieldLabelClass}>
+                    Title
+                  </label>
+                  <input
+                    id="footer-title"
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => updateField("title", e.target.value)}
+                    placeholder="e.g. Privacy Policy"
+                    className={fieldClass("title")}
+                    autoComplete="off"
+                    onFocus={() =>
+                      setValidationErrors((prev) => ({ ...prev, title: "" }))
+                    }
+                  />
+                  {validationErrors.title && (
+                    <p className={helperTextClass}>{validationErrors.title}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2.5">
+                  <label htmlFor="footer-group-type" className={fieldLabelClass}>
+                    Group Type
+                  </label>
+                  {isLoadingGroupTypes ? (
+                    <div className="flex h-[54px] w-full items-center rounded-xl border border-slate-200/80 bg-slate-50/90 px-4 dark:border-slate-700/70 dark:bg-slate-900/70">
+                      <div className="h-4 w-32 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+                    </div>
+                  ) : (
+                    <select
+                      id="footer-group-type"
+                      value={formData.group_type_id?.toString() || ""}
+                      onChange={(e) =>
+                        updateField("group_type_id", e.target.value)
+                      }
+                      className={`${fieldClass("group_type_id")} cursor-pointer appearance-none`}
+                      onFocus={() =>
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          group_type_id: "",
+                        }))
+                      }
+                    >
+                      <option value="">Select Group Type</option>
+                      {footerGroupTypes.map((gt) => (
+                        <option key={gt.id} value={gt.id.toString()}>
+                          {gt.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {validationErrors.group_type_id && (
+                    <p className={helperTextClass}>
+                      {validationErrors.group_type_id}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2.5">
+                <label className={fieldLabelClass}>Link Type</label>
+                <div className="inline-flex w-full max-w-xs rounded-2xl border border-slate-200/70 bg-slate-100/90 p-1 dark:border-slate-700/60 dark:bg-slate-800/80">
+                  {linkTypeOptions.map((lt) => {
+                    const isActive = `${formData.link_type ?? ""}` === lt.value;
+
+                    return (
+                      <button
+                        key={lt.value}
+                        type="button"
+                        onClick={() => updateField("link_type", lt.value)}
+                        className={`flex-1 rounded-xl px-5 py-2.5 text-sm font-bold transition-all ${
+                          isActive
+                            ? "bg-[#025ADB] text-white shadow-[0_10px_20px_rgba(2,90,219,0.22)]"
+                            : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-100"
+                        }`}
+                      >
+                        {lt.name}
+                      </button>
+                    );
+                  })}
+                </div>
                 {validationErrors.link_type && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {validationErrors.link_type}
-                  </p>
+                  <p className={helperTextClass}>{validationErrors.link_type}</p>
                 )}
               </div>
 
-              <div className="col-span-1">
-                <label className="font-semibold block mb-1 text-gray-900 dark:text-white">
-                  Slug
+              <div className="space-y-2.5">
+                <label htmlFor="footer-slug" className={fieldLabelClass}>
+                  Slug / URL
                 </label>
-                <input
-                  type="text"
-                  value={formData.link}
-                  onChange={(e) => updateField("link", e.target.value)}
-                  placeholder="i.e. example-slug"
-                  className={inputClass("link")}
-                  autoComplete="off"
-                  onFocus={() =>
-                    setValidationErrors((prev) => ({ ...prev, link: "" }))
-                  }
-                />
+                <div
+                  className={`flex overflow-hidden rounded-xl border bg-slate-50/90 transition-all focus-within:ring-4 dark:bg-slate-900/70 ${
+                    validationErrors.link
+                      ? "border-red-400/80 focus-within:border-red-400 focus-within:ring-red-500/10"
+                      : "border-slate-200/80 focus-within:border-[#025ADB]/25 focus-within:ring-[#025ADB]/10 dark:border-slate-700/70"
+                  }`}
+                >
+                  <span className="flex items-center border-r border-slate-200/70 bg-slate-100/70 px-4 text-sm font-semibold text-slate-500 dark:border-slate-700/70 dark:bg-slate-800/70 dark:text-slate-400">
+                    {slugPrefix}
+                  </span>
+                  <input
+                    id="footer-slug"
+                    type="text"
+                    value={formData.link}
+                    onChange={(e) => updateField("link", e.target.value)}
+                    placeholder="privacy-policy"
+                    className="min-w-0 flex-1 bg-transparent px-4 py-3.5 text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    autoComplete="off"
+                    onFocus={() =>
+                      setValidationErrors((prev) => ({ ...prev, link: "" }))
+                    }
+                  />
+                </div>
                 {validationErrors.link && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {validationErrors.link}
-                  </p>
+                  <p className={helperTextClass}>{validationErrors.link}</p>
                 )}
               </div>
 
-              {Number(formData.link_type) === 2 && (
-                <div className="col-span-1 sm:col-span-2 mt-2">
-                  <label className="font-semibold block mb-1 text-gray-900 dark:text-white">
+              {isExternal && (
+                <div className="space-y-2.5">
+                  <label htmlFor="footer-content" className={fieldLabelClass}>
                     Content
                   </label>
                   <textarea
+                    id="footer-content"
                     value={formData.content}
                     onChange={(e) => updateField("content", e.target.value)}
-                    className={inputClass("content")}
+                    className={`${fieldClass("content")} min-h-36 resize-y`}
                     rows={5}
                     onFocus={() =>
                       setValidationErrors((prev) => ({ ...prev, content: "" }))
                     }
                   />
                   {validationErrors.content && (
-                    <p className="text-red-500 text-sm mt-1">
+                    <p className={helperTextClass}>
                       {validationErrors.content}
                     </p>
                   )}
                 </div>
               )}
 
-              <div className="col-span-1 sm:col-span-2 flex items-center gap-4 mt-2">
-                <label className="font-semibold w-24 text-gray-900 dark:text-white">
-                  Status
-                </label>
-                <div className="flex-auto">
-                  <button
-                    type="button"
-                    onClick={() => setIsChecked(!isChecked)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isChecked ? "bg-sky-500" : "bg-gray-300 dark:bg-gray-600"}`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isChecked ? "translate-x-6" : "translate-x-1"}`}
-                    />
-                  </button>
+              <div className="flex flex-col gap-4 rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 p-5 sm:flex-row sm:items-center sm:justify-between dark:border-slate-700/60 dark:bg-slate-800/60">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500/12 text-emerald-500">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="h-5 w-5"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.38 7.53l-4.82 5.5a1 1 0 01-1.47.05l-2.46-2.46a1 1 0 111.42-1.41l1.7 1.7 4.08-4.65a1 1 0 111.55 1.27z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                      Active Status
+                    </p>
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                      Make this link visible on production immediately
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-end items-center gap-3 p-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
-            {isLoading ? (
-              <button
-                disabled
-                className="px-6 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed flex items-center gap-2"
-              >
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              </button>
-            ) : (
-              <>
+
                 <button
                   type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 border border-red-500 text-red-500 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                  aria-pressed={isChecked}
+                  onClick={() => setIsChecked(!isChecked)}
+                  className={`relative inline-flex h-7 w-12 shrink-0 rounded-full p-1 transition-all ${
+                    isChecked
+                      ? "bg-emerald-500 shadow-[0_8px_20px_rgba(16,185,129,0.28)]"
+                      : "bg-slate-300 dark:bg-slate-600"
+                  }`}
                 >
-                  <i className="pi pi-times-circle" />
-                  Cancel
+                  <span
+                    className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+                      isChecked ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
                 </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col-reverse gap-3 border-t border-slate-200/60 bg-slate-50/70 px-6 py-5 sm:flex-row sm:items-center sm:justify-end sm:px-8 dark:border-slate-800/80 dark:bg-slate-900/55">
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-bold text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+              >
+                Cancel
+              </button>
+
+              {isLoading ? (
+                <button
+                  disabled
+                  className="inline-flex min-w-40 items-center justify-center gap-2 rounded-xl bg-[#025ADB] px-8 py-3 text-sm font-bold text-white opacity-80"
+                >
+                  <div className="h-4 w-4 rounded-full border-2 border-white/80 border-t-transparent animate-spin" />
+                  Saving...
+                </button>
+              ) : (
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2"
+                  className="inline-flex items-center justify-center rounded-xl bg-[#025ADB] px-8 py-3 text-sm font-bold text-white shadow-[0_18px_34px_rgba(2,90,219,0.24)] transition-all hover:bg-[#0149b3] active:scale-[0.98]"
                 >
-                  <i
-                    className={
-                      modalTitle === "Create"
-                        ? "pi pi-plus-circle"
-                        : "pi pi-refresh"
-                    }
-                  />
-                  {modalTitle === "Create" ? "Create" : "Update"}
+                  {isEditMode ? "Update Footer" : "Create Footer"}
                 </button>
-              </>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
       )}
     </>
   );

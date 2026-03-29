@@ -14,7 +14,7 @@ const AdminPanelLayout = ({ children }: { children: React.ReactNode }) => {
       <AdminSidebar />
       <div
         className={`relative transition-all duration-500 ease-in-out min-h-screen ${
-          isOpen ? "ml-0 md:ml-[250px]" : "ml-0 md:ml-[70px]"
+          isOpen ? "ml-0 md:ml-[280px]" : "ml-0 md:ml-[70px]"
         }`}
       >
         <AdminHeader />
