@@ -1,0 +1,23 @@
+﻿country: Country { id: number; en_short_name: string; nationality: string; num_code: string; alpha_2_code: string; alpha_3_code: string; status: number; }
+currencies: Currency { id: number; name: string; code: string; exchange_rate: number; status: number; }
+customer-reviews: CustomerReview { id: number; plan_id?: number | string; name?: string; review: string; rating: number | string; plan?: { name: string }
+email-templates: EmailTemplate { id: number; name: string; slug: string; status: number; }
+event: EventItem { id: number; title: string; slug: string; status: number; }
+event-categories: EventCategory { id: number; title: string; slug: string; parent_id?: number; parent?: { id: number; title: string }
+features: FeatureItem { id: number; name: string; icon: string; color: string; status: number; }
+footer-group-types: FooterGroupType { id: number; name: string; slug: string; status: number; }
+genders: Gender { id: number; gender_name: string; status: number; }
+languages: Language { id: number; language_name: string; status: number; }
+metas: MetaItem { id: number; title: string; description: string; og_title: string; og_description: string; og_image: string; og_image_alt: string; og_url: string; og_type: string; og_locale: string; twitter_card: string; twitter_title: string; twitter_site: string; twitter_description: string; twitter_image: string; twitter_image_alt: string; twitter_creator: string; keywords: string; robots: string; author: string; publisher: string; canonical: string; slug: string; status: number; }
+partners: Partner { id: number; name: string; logo?: string; short_desc?: string; status: number; }
+payment-gateways: PaymentGateway { id: number; name: string; slug: string; status: number; }
+release-notes: ReleaseNote { id: number; title: string; version_name: string; status: number; }
+sms-templates: SmsTemplate { id: number; name: string; slug: string; status: number; }
+social-links: SocialLink { id: number; social_title: string; icon: string; color: string; url: string; status: number; }
+tags: Tag { id: number; tag_title: string; status: number; }
+trusted-brands: TrustedBrand { id: number; title: string; photo?: string; status: number; }
+years: Year { id: number; year: string | number; status: number; }
+cms-auth-client: CmsAuthClient { id: number; name: string; email: string; status: number; }
+subscribes: Subscribe { id: number; email: string; subscribed_at: string | null; expires_at: string | null; is_active: number; status: number; }
+role: RoleItem { id: number; role_name: string; status: number; }
+plans: PlanItem { id: number; name: string; slug: string; serials: number; status: number; }
