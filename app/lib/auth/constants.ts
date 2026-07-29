@@ -1,0 +1,4 @@
+export const ADMIN_SESSION_COOKIE = 'XADM-TOKEN';
+export const CITIZEN_SESSION_COOKIE = 'XCTN-TOKEN';
+
+export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;

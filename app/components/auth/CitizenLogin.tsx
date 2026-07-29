@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCitizenAuth } from "@/app/contexts/CitizenAuthContext";
 import CitizenLayout from "@/app/components/auth/CitizenLayout";
 import ButtonPrimary from "@/app/components/ui/ButtonPrimary";
@@ -11,228 +10,142 @@ import InputError from "@/app/components/ui/InputError";
 export default function CitizenLogin() {
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [form, setForm] = useState({ login_id: "", password: "" });
-  const [unauthorizedError, setUnauthorizedError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const { login, googleLogin, facebookLogin } = useCitizenAuth();
-  const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loadingAction, setLoadingAction] = useState<"login" | "demo" | null>(
+    null,
+  );
+  const { login, demoLogin } = useCitizenAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setUnauthorizedError("");
+  const messageFrom = (error: unknown, fallback: string) => {
+    if (error && typeof error === "object" && "data" in error) {
+      const apiError = error as { data?: { message?: string } };
+      return apiError.data?.message ?? fallback;
+    }
+    return error instanceof Error ? error.message : fallback;
+  };
 
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoadingAction("login");
+    setErrorMessage("");
     try {
-      const response = await login(form);
-      if (response) {
-        window.location.href = "/dashboard";
-        return;
-      }
+      await login(form);
     } catch (error: unknown) {
-      if (error && typeof error === "object" && "data" in error) {
-        const apiError = error as { data?: { message?: string } };
-        setUnauthorizedError(apiError.data?.message || "Login failed");
-      } else if (error instanceof Error) {
-        setUnauthorizedError(error.message || "Login failed");
-      } else {
-        setUnauthorizedError(
-          "An unexpected error occurred. Please try again later.",
-        );
-      }
+      setErrorMessage(messageFrom(error, "Citizen sign-in failed."));
     } finally {
-      setIsLoading(false);
+      setLoadingAction(null);
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    setUnauthorizedError("");
+  const handleDemoLogin = async () => {
+    setLoadingAction("demo");
+    setErrorMessage("");
     try {
-      const response = await googleLogin();
-      if (response) {
-        window.location.href = "/dashboard";
-        return;
-      }
+      await demoLogin();
     } catch (error: unknown) {
-      if (error && typeof error === "object" && "data" in error) {
-        const apiError = error as { data?: { errors?: string } };
-        setUnauthorizedError(apiError.data?.errors || "Google login failed");
-      } else if (error instanceof Error) {
-        setUnauthorizedError(error.message || "Google login failed");
-      } else {
-        setUnauthorizedError("An unexpected error occurred.");
-      }
+      setErrorMessage(messageFrom(error, "Citizen reviewer access failed."));
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleFacebookLogin = async () => {
-    setIsLoading(true);
-    setUnauthorizedError("");
-    try {
-      const response = await facebookLogin();
-      if (response) {
-        window.location.href = "/dashboard";
-        return;
-      }
-    } catch (error: unknown) {
-      if (error && typeof error === "object" && "data" in error) {
-        const apiError = error as { data?: { errors?: string } };
-        setUnauthorizedError(apiError.data?.errors || "Facebook login failed");
-      } else if (error instanceof Error) {
-        setUnauthorizedError(error.message || "Facebook login failed");
-      } else {
-        setUnauthorizedError("An unexpected error occurred.");
-      }
-    } finally {
-      setIsLoading(false);
+      setLoadingAction(null);
     }
   };
 
   return (
     <CitizenLayout>
-      <form onSubmit={handleSubmit} className="flex flex-col w-full space-y-2">
-        <div className="flex items-start justify-center mb-3">
-          <div className="text-lg font-extrabold">
-            <span>Sign In To Accessimate</span>
-          </div>
-        </div>
+      <div className="mb-5 text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">
+          Citizen workspace
+        </p>
+        <h1 className="mt-2 text-2xl font-extrabold text-slate-900">
+          Sign in to Accessimate
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          Social sign-in is intentionally disabled until provider verification
+          credentials are configured.
+        </p>
+      </div>
 
-        {/* Social Login */}
-        <div className="flex flex-wrap items-center justify-between gap-1 mt-2 space-y-2 text-blue-500">
-          <button
-            onClick={handleGoogleLogin}
-            type="button"
-            className="flex gap-4 px-4 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              loading="lazy"
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/c9c122158c1ec8e6bba1d8d4ef6be9f67bd5a0235b3888a17bebb6cc24082ea8"
-              alt="Google logo"
-              className="w-3"
-            />
-            <span>Sign in with Google</span>
-          </button>
-          <div className="flex gap-2 m-[0!important]">
-            <button
-              type="button"
-              onClick={handleFacebookLogin}
-              className="focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                loading="lazy"
-                src="https://cdn.builder.io/api/v1/image/assets/TEMP/c8e92a79c334270fd2f383aeb18f533e0e8b0fb583d30b483981e9ee2253e71a"
-                alt="Facebook login"
-                className="w-10 cursor-pointer"
-              />
-            </button>
-          </div>
-        </div>
-
-        <div className="flex items-center my-6">
-          <div className="grow h-px bg-gray-300"></div>
-          <span className="mx-4 text-gray-500 text-sm font-medium">OR</span>
-          <div className="grow h-px bg-gray-300"></div>
-        </div>
-
-        {/* Form Fields */}
+      <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
         <div>
-          <label htmlFor="username" className="block text-base text-black">
-            E-mail
+          <label htmlFor="citizen-login-id" className="text-sm font-medium text-slate-700">
+            Email or login ID
           </label>
           <input
-            id="username"
+            id="citizen-login-id"
             type="text"
+            required
+            autoComplete="username"
             value={form.login_id}
-            onChange={(e) => setForm({ ...form, login_id: e.target.value })}
-            className="w-full px-4 py-2 mt-2 text-sm font-light bg-white border border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                login_id: event.target.value,
+              }))
+            }
+            className="mt-2 w-full rounded-lg border border-sky-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-base text-black">
+          <label htmlFor="citizen-password" className="text-sm font-medium text-slate-700">
             Password
           </label>
           <div className="relative">
             <input
-              id="password"
+              id="citizen-password"
               type={passwordOpen ? "text" : "password"}
+              required
+              autoComplete="current-password"
               value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full px-4 py-2 pr-12 mt-2 text-sm font-light bg-white border border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  password: event.target.value,
+                }))
+              }
+              className="mt-2 w-full rounded-lg border border-sky-300 bg-white px-4 py-3 pr-12 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
             />
             <button
               type="button"
-              onClick={() => setPasswordOpen(!passwordOpen)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              aria-label={passwordOpen ? "Hide password" : "Show password"}
+              onClick={() => setPasswordOpen((current) => !current)}
+              className="absolute right-3 top-1/2 mt-1 -translate-y-1/2 rounded-md p-2 text-slate-400 hover:text-slate-700"
             >
-              <i
-                className={`fa text-lg ${passwordOpen ? "fa-eye" : "fa-eye-slash"}`}
-              ></i>
+              <i className={`fa ${passwordOpen ? "fa-eye" : "fa-eye-slash"}`} />
             </button>
           </div>
         </div>
 
-        <Link
-          href="/forgot-password"
-          className="self-end mt-2 text-sm text-blue-500 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          Forgot Password
-        </Link>
-
         <ButtonPrimary
-          disabled={isLoading}
-          className={`self-center w-full px-6 py-3 text-base font-medium text-white rounded-lg bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-600 ${isLoading ? "opacity-65" : ""}`}
+          disabled={loadingAction !== null}
+          className="w-full rounded-lg bg-sky-600 px-6 py-3 font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {!isLoading ? (
-            <span>Sign in</span>
-          ) : (
-            <svg
-              className="text-gray-300 animate-spin mx-auto"
-              viewBox="0 0 64 64"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-            >
-              <path
-                d="M32 3C35.8083 3 39.5794 3.75011 43.0978 5.20749C46.6163 6.66488 49.8132 8.80101 52.5061 11.4939C55.199 14.1868 57.3351 17.3837 58.7925 20.9022C60.2499 24.4206 61 28.1917 61 32C61 35.8083 60.2499 39.5794 58.7925 43.0978C57.3351 46.6163 55.199 49.8132 52.5061 52.5061C49.8132 55.199 46.6163 57.3351 43.0978 58.7925C39.5794 60.2499 35.8083 61 32 61C28.1917 61 24.4206 60.2499 20.9022 58.7925C17.3837 57.3351 14.1868 55.199 11.4939 52.5061C8.801 49.8132 6.66487 46.6163 5.20749 43.0978C3.7501 39.5794 3 35.8083 3 32C3 28.1917 3.75011 24.4206 5.2075 20.9022C6.66489 17.3837 8.80101 14.1868 11.4939 11.4939C14.1868 8.80099 17.3838 6.66487 20.9022 5.20749C24.4206 3.7501 28.1917 3 32 3L32 3Z"
-                stroke="currentColor"
-                strokeWidth="5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              ></path>
-              <path
-                d="M32 3C36.5778 3 41.0906 4.08374 45.1692 6.16256C49.2477 8.24138 52.7762 11.2562 55.466 14.9605C58.1558 18.6647 59.9304 22.9531 60.6448 27.4748C61.3591 31.9965 60.9928 36.6232 59.5759 40.9762"
-                stroke="currentColor"
-                strokeWidth="5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-green-500"
-              ></path>
-            </svg>
-          )}
+          {loadingAction === "login" ? "Signing in…" : "Sign in"}
         </ButtonPrimary>
 
-        <div className="min-h-4">
-          <InputError message={unauthorizedError} />
+        <button
+          type="button"
+          onClick={handleDemoLogin}
+          disabled={loadingAction !== null}
+          className="w-full rounded-lg border border-sky-200 bg-sky-50 px-5 py-3 text-sm font-semibold text-sky-700 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loadingAction === "demo"
+            ? "Opening citizen demo…"
+            : "Explore citizen reviewer demo"}
+        </button>
+
+        <div className="min-h-5">
+          <InputError message={errorMessage} />
         </div>
       </form>
 
-      <div className="flex items-start justify-center mt-2">
-        <div className="flex justify-center text-sm text-gray-500">
-          No Account?&nbsp;
-          <br />
-          <button
-            onClick={() => router.push("/registration")}
-            type="button"
-            className="text-sky-600 hover:underline focus:outline-none focus:ring-2 focus:ring-sky-600"
-          >
-            Sign up
-          </button>
-        </div>
+      <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+        <Link href="/" className="font-medium text-slate-500 hover:text-slate-800">
+          Back to overview
+        </Link>
+        <span className="text-slate-300">•</span>
+        <Link href="/admin-login" className="font-semibold text-sky-600 hover:text-sky-700">
+          Admin portal
+        </Link>
       </div>
     </CitizenLayout>
   );

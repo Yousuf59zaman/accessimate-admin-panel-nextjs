@@ -16,7 +16,7 @@ interface PortfolioItem {
   id: number;
   title: string;
   slug: string;
-  status: number | boolean;
+  status: number;
   photo?: string;
   category?: PortfolioCategory;
   cat_id?: number | string;
@@ -221,7 +221,7 @@ function PortfoliosPageInner() {
   const paginationData = paginationMeta as PaginationData;
   const totalProjects = paginationData?.total ?? data.length;
 
-  const pageTokens = useMemo(() => {
+  const pageTokens = useMemo<Array<number | "ellipsis">>(() => {
     if (!paginationData || paginationData.last_page <= 1) return [];
 
     const { current_page: currentPage, last_page: lastPage } = paginationData;
@@ -474,8 +474,7 @@ function PortfoliosPageInner() {
 
                         <div className="space-y-3">
                           {group.items.map((item) => {
-                            const isActive =
-                              item.status === 1 || item.status === true;
+                            const isActive = item.status === 1;
                             const cleanDescription = stripHtml(item.description);
                             const dateLabel = formatCompletionDate(
                               item.completion_date,
@@ -495,7 +494,6 @@ function PortfoliosPageInner() {
                               >
                                 <div className="flex min-w-0 gap-4">
                                   <div className="relative h-[72px] w-[96px] flex-shrink-0 overflow-hidden rounded-[1rem] border border-slate-200/70 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                       src={
                                         item.photo || "/svg/not-found-img.svg"

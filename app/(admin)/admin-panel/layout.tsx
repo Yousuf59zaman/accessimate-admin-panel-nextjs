@@ -4,7 +4,6 @@ import React from "react";
 import { useSidebar } from "@/app/contexts/SidebarContext";
 import AdminSidebar from "@/app/components/layout/AdminSidebar";
 import AdminHeader from "@/app/components/layout/AdminHeader";
-import withAuth from "@/app/hoc/withAuth";
 
 const AdminPanelLayout = ({ children }: { children: React.ReactNode }) => {
   const { isOpen } = useSidebar();
@@ -24,4 +23,4 @@ const AdminPanelLayout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default withAuth(AdminPanelLayout, ["Admin"]);
+export default AdminPanelLayout;

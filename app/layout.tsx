@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import "primeicons/primeicons.css";
 import { AdminAuthProvider } from "@/app/contexts/AdminAuthContext";
 import { CitizenAuthProvider } from "@/app/contexts/CitizenAuthContext";
@@ -25,8 +26,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Accessimate Admin",
-  description: "Accessimate Admin Panel",
+  title: {
+    default: "Accessimate Control | Full-Stack Multi-Panel SaaS",
+    template: "%s | Accessimate Control",
+  },
+  description:
+    "Independent Next.js, NestJS, Prisma, and PostgreSQL multi-panel SaaS with secure reviewer access, persisted CMS workflows, and live analytics.",
 };
 
 export default function RootLayout({
@@ -36,9 +41,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="stylesheet" href="/fa-6.4.0/css/all.css" />
-      </head>
       <body
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >

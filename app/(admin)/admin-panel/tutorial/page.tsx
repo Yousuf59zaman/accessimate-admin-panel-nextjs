@@ -14,7 +14,7 @@ interface TutorialItem {
   id: number;
   title: string;
   slug: string;
-  status: number | boolean;
+  status: number;
   type?: number;
   category?: { id: number; title: string };
 }
@@ -181,7 +181,7 @@ function TutorialPageInner() {
   const paginationData = paginationMeta as PaginationData;
   const totalTutorials = paginationData?.total ?? data.length;
 
-  const pageTokens = useMemo(() => {
+  const pageTokens = useMemo<Array<number | "ellipsis">>(() => {
     if (!paginationData || paginationData.last_page <= 1) return [];
 
     const { current_page: currentPage, last_page: lastPage } = paginationData;
@@ -440,8 +440,7 @@ function TutorialPageInner() {
 
                         <div className="space-y-3">
                           {group.items.map((item, itemIndex) => {
-                            const isActive =
-                              item.status === 1 || item.status === true;
+                            const isActive = item.status === 1;
                             const typeLabel = getTypeLabel(item.type);
                             const slugLabel = item.slug
                               ? item.slug.startsWith("/")

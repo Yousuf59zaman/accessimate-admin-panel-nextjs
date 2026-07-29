@@ -1,229 +1,102 @@
-# Next.js Multi-Panel Application
+# Accessimate Admin Panel
 
-> A production-grade, multi-role dashboard system built with Next.js 16, React 19, TypeScript, and Tailwind CSS v4 — featuring role-based panels, real-time data, payment integration, and enterprise UI components.
+An independently deployed multi-panel CMS built with Next.js, NestJS, Prisma, and PostgreSQL. The application does not depend on any legacy API or database.
 
-## 🎯 Project Overview
+## Live reviewer build
 
-A comprehensive multi-panel web application designed for organizations that need **separate user experiences** for different roles (Admin, Citizen) within a single unified codebase. Built with modern Next.js App Router architecture and optimized for scalability.
+- Application: https://accessimate-admin-panel-nextjs.vercel.app
+- API health: https://accessimate-admin-panel-api.vercel.app/api/v1/health
+- Swagger: https://accessimate-admin-panel-api.vercel.app/api/docs
 
-## ✨ Key Features
+Use **Open admin reviewer demo** or **Open citizen demo** on the landing page. Public reviewer accounts are intentionally read-only; private owner credentials are never stored in the repository or returned to the browser.
 
-### 🔐 Multi-Role Panel System
-- **Admin Panel** (`/(admin)/admin-panel`) — Full administrative dashboard with user management, analytics, and system controls
-- **Citizen Dashboard** (`/(citizen)/dashboard`) — Public-facing dashboard for end users with personalized views
-- **Authentication Flow** (`/(auth)`) — Secure login/registration with role-based routing
+## Implemented architecture
 
-### 💳 Payment Integration
-- **Stripe Payment Gateway** — Full integration with `@stripe/react-stripe-js` and `@stripe/stripe-js`
-- Secure payment processing for subscriptions and transactions
-
-### 📊 Data Visualization & Analytics
-- **Chart.js** with `react-chartjs-2` — Interactive charts for dashboards
-- **PrimeReact** components — Enterprise-grade UI components with `primeicons`
-- Real-time data display with responsive layouts
-
-### 📝 Rich Text & Content Management
-- **React Quill New** — WYSIWYG rich text editor for content creation
-- **Date-fns** — Date formatting and manipulation utilities
-
-### 🎨 Drag & Drop Functionality
-- **@dnd-kit** — Modern drag-and-drop toolkit for sortable lists and interactive UI elements
-- Smooth animations and accessible drag interactions
-
-### 🔥 Real-time Features
-- **Firebase Integration** — Real-time database, authentication, and cloud services
-- Live data synchronization across panels
-
-### 🌓 Theme System
-- **next-themes** — Dark/light mode with system preference detection
-- Seamless theme switching with persistence
-
-### 🎯 State Management
-- **React Context API** — Global state management via `app/contexts`
-- **Custom Hooks** — Reusable logic in `app/hooks`
-- **Helper Utilities** — Shared functions in `app/helpers`
-
-### 🏗 Architecture Highlights
-- **Higher-Order Components (HOC)** — Reusable component logic in `app/hoc`
-- **Library/Utilities** — Core utilities in `app/lib`
-- **Component-Driven Design** — Modular, reusable components in `app/components`
-- **TypeScript-First** — Full type safety across the entire codebase
-
-## 🛠 Tech Stack
-
-| Category | Technology |
-|----------|-----------|
-| **Framework** | Next.js 16.1.6 (App Router) |
-| **Frontend** | React 19.2.3 |
-| **Language** | TypeScript 5.x |
-| **Styling** | Tailwind CSS v4, Sass |
-| **UI Components** | PrimeReact 10.9.7, Heroicons 2.2.0 |
-| **Charts** | Chart.js 4.5.1, react-chartjs-2 5.3.1 |
-| **Payments** | Stripe (react-stripe-js 5.6.0) |
-| **Real-time** | Firebase 12.9.0 |
-| **Drag & Drop** | @dnd-kit/core 6.3.1, @dnd-kit/sortable 10.0.0 |
-| **Rich Text** | react-quill-new 3.8.3 |
-| **Theme** | next-themes 0.4.6 |
-| **Utilities** | date-fns 4.1.0, js-cookie 3.0.5 |
-| **Package Manager** | pnpm 10.21.0 |
-
-## 📁 Project Structure
-
-```
-nextJs-multi-panel/
-├── app/
-│   ├── (admin)/
-│   │   └── admin-panel/          # Admin dashboard & management
-│   ├── (auth)/                   # Authentication routes
-│   ├── (citizen)/
-│   │   └── dashboard/            # Citizen user dashboard
-│   ├── assets/css/               # Global stylesheets
-│   ├── components/               # Reusable UI components
-│   ├── contexts/                 # React Context providers
-│   ├── helpers/                  # Utility functions
-│   ├── hoc/                      # Higher-Order Components
-│   ├── hooks/                    # Custom React hooks
-│   ├── lib/                      # Core libraries & utilities
-│   ├── styles/                   # Component-specific styles
-│   ├── layout.tsx                # Root layout
-│   ├── page.tsx                  # Landing page
-│   ├── globals.css               # Global CSS
-│   └── primereact-provider.tsx   # PrimeReact context wrapper
-├── public/                       # Static assets
-├── package.json
-├── tsconfig.json
-└── next.config.ts
+```text
+Browser
+  -> same-origin Next.js route handlers
+  -> role-specific HttpOnly session cookie
+  -> NestJS REST API
+  -> Prisma ORM
+  -> independent PostgreSQL database
 ```
 
-## 🚀 Getting Started
+- Next.js 16 App Router and React 19 frontend
+- Filewise guest/admin/citizen access checks in route-group layouts
+- Same-origin BFF that keeps JWTs out of client JavaScript and API responses
+- Separate admin and citizen authentication journeys
+- NestJS 11 API with validation, request IDs, rate limiting, Helmet, CORS, and Swagger
+- Prisma 6 migrations and production-safe seed workflow
+- Neon PostgreSQL database dedicated to this project
+- 34 persisted CMS modules with server-side search, filters, pagination, status, permissions, soft delete, and restore
+- Recursive database-driven navigation and drag-and-drop menu administration
+- Secure image/PDF persistence with size, MIME, and file-signature validation
+- Legacy Base64 form compatibility for the existing CMS upload controls
+- Live account, content, status, trash, and seven-day activity analytics
+- Audit records for owner mutations
 
-### Prerequisites
-- Node.js 18+ (recommended: 20+)
-- pnpm 10.21.0+
+Social SSO and real payment-provider transactions are not presented as active features. Their UI/integration packages remain available for future provider configuration.
 
-### Installation
+## Repository structure
+
+```text
+app/                       Next.js routes, role layouts, components, BFF, auth contexts
+backend/src/               NestJS modules, guards, services, controllers
+backend/prisma/            PostgreSQL schema, migrations, seed
+backend/test/              PostgreSQL end-to-end API suite
+public/                    Static application assets
+vercel.json                Frontend deployment configuration
+backend/vercel.json        API deployment configuration
+```
+
+## Local setup
+
+Requirements: Node.js 20 or newer and pnpm 10.
 
 ```bash
-# Clone the repository
-git clone https://github.com/Yousuf59zaman/nextJs-multi-panel.git
-cd nextJs-multi-panel
+pnpm install --frozen-lockfile
+pnpm --dir backend install --frozen-lockfile
+```
 
-# Install dependencies
-pnpm install
+Copy the sanitized examples and provide local values:
 
-# Start development server
+```bash
+cp .env.example .env.local
+cp backend/.env.example backend/.env
+```
+
+Initialize the independent database:
+
+```bash
+pnpm --dir backend prisma:migrate:deploy
+pnpm --dir backend prisma:seed
+```
+
+Production seeding requires `OWNER_ADMIN_LOGIN_ID`, `OWNER_ADMIN_EMAIL`, and a strong `OWNER_ADMIN_PASSWORD`. Reviewer accounts use dedicated one-click demo endpoints and cannot mutate data.
+
+Run the API and frontend in separate terminals:
+
+```bash
+pnpm --dir backend dev
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Available Scripts
+## Quality gates
 
 ```bash
-# Development
-pnpm dev              # Start dev server with hot reload
+pnpm typecheck
+pnpm lint
+pnpm build
 
-# Production
-pnpm build            # Build for production
-pnpm start            # Start production server
-
-# Code Quality
-pnpm lint             # Run ESLint
+pnpm --dir backend typecheck
+pnpm --dir backend lint
+pnpm --dir backend test
+pnpm --dir backend test:e2e
+pnpm --dir backend build
 ```
 
-## 🏗 Architecture Decisions
+The end-to-end suite uses a real PostgreSQL database and verifies health, both reviewer roles, all 34 CMS list contracts, validation, read-only enforcement, owner CRUD, soft delete/restore, large Base64 asset conversion and delivery, menu DTOs, dashboard analytics, and invalid-session rejection.
 
-### Why Next.js App Router?
-- **Server Components** by default for better performance
-- **Route Groups** `()` for logical organization without URL impact
-- **Layouts** for shared UI across routes
-- **Streaming** for progressive page loading
+## Deployment
 
-### Why pnpm?
-- **Faster installs** — Hard links instead of copies
-- **Disk efficient** — Shared dependency store
-- **Strict mode** — Prevents phantom dependencies
-
-### Component Architecture
-- **Atomic Design** — Small, focused components
-- **Composition over Inheritance** — Flexible component patterns
-- **TypeScript Interfaces** — Clear component contracts
-
-## 🎯 Use Cases
-
-This project demonstrates expertise in:
-- ✅ **Multi-tenant applications** — Role-based UI/UX
-- ✅ **Enterprise dashboards** — Complex data visualization
-- ✅ **E-commerce platforms** — Payment integration
-- ✅ **SaaS products** — Subscription management
-- ✅ **Real-time applications** — Firebase integration
-- ✅ **Accessible UI** — ARIA-compliant components
-
-## 🔒 Security Features
-
-- **Environment Variables** — Secure configuration management
-- **Stripe Security** — PCI-compliant payment processing
-- **Firebase Auth** — Industry-standard authentication
-- **TypeScript** — Compile-time error prevention
-- **Input Validation** — Client and server-side validation
-
-## 📊 Performance Optimizations
-
-- **Next.js Image Optimization** — Automatic image compression
-- **Font Optimization** — `next/font` for Google Fonts
-- **Code Splitting** — Automatic route-based splitting
-- **Static Generation** — SSG for marketing pages
-- **Server Components** — Reduced client-side JavaScript
-
-## 🚀 Deployment
-
-### Vercel (Recommended)
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel
-```
-
-### Other Platforms
-- **Netlify** — `netlify deploy`
-- **AWS Amplify** — Connect GitHub repo
-- **Docker** — Custom Dockerfile
-
-## 🤝 Contributing
-
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 👤 Author
-
-**Yousuf Zaman**
-- GitHub: [@Yousuf59zaman](https://github.com/Yousuf59zaman)
-- LinkedIn: [Md Yousuf Zaman](https://www.linkedin.com/in/md-yousuf-zaman-8596812a8/)
-
-## 🙏 Acknowledgments
-
-- [Next.js](https://nextjs.org) — The React Framework
-- [Vercel](https://vercel.com) — Deployment platform
-- [PrimeReact](https://primereact.org) — UI component library
-- [Stripe](https://stripe.com) — Payment infrastructure
-- [Firebase](https://firebase.google.com) — Backend-as-a-Service
-
----
-
-<div align="center">
-
-**Built with ❤️ using Next.js 16, React 19, and TypeScript**
-
-[⭐ Star this repo](https://github.com/Yousuf59zaman/nextJs-multi-panel/stargazers) if you found it helpful!
-
-</div>
+The frontend and API are separate Vercel projects. Only the frontend server receives `API_URL_BACKEND`; there is no public backend environment variable in the browser bundle. Runtime secrets and database URLs are configured through Vercel environment settings, while the PostgreSQL database runs on Neon.

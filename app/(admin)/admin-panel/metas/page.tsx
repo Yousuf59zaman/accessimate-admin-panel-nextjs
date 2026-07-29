@@ -276,7 +276,6 @@ function MetasPageInner() {
                             <div className="flex items-center gap-2">
                               <div className="m-2 w-[90px] h-[80px] bg-white rounded-[5px] flex items-center justify-center text-[#ccc] border border-gray-300">
                                 {item.og_image && !imageErrors[item.id] ? (
-                                  /* eslint-disable-next-line @next/next/no-img-element */
                                   <img
                                     src={item.og_image}
                                     alt={item.title}
@@ -284,7 +283,6 @@ function MetasPageInner() {
                                     onError={() => handleImageError(item.id)}
                                   />
                                 ) : (
-                                  /* eslint-disable-next-line @next/next/no-img-element */
                                   <img
                                     src="/svg/not-found-img.svg"
                                     alt="not found"

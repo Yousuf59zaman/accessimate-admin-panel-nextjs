@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountType {
+  ADMIN
+  CITIZEN
+}
+
+model Account {
+  id           String      @id @default(uuid())
+  loginId      String      @unique
+  email        String      @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  type         AccountType
+  isDemo       Boolean     @default(false)
+  isActive     Boolean     @default(true)
+  roles        String[]
+  permissions  String[]
+  profile      Json?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  auditLogs    AuditLog[]
+
+  @@index([type, isActive])
+}
+
+model ResourceRecord {
+  id            Int       @id @default(autoincrement())
+  resource      String
+  status        Int       @default(1)
+  data          Json
+  searchText    String    @default("") @db.Text
+  identityValue String?
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([resource, status, deletedAt])
+  @@index([resource, createdAt])
+  @@index([resource, identityValue, deletedAt])
+}
+
+model MenuItem {
+  id            Int        @id @default(autoincrement())
+  parentId      Int?
+  nodeName      String
+  routeName     String?
+  routeLocation String?
+  icon          String     @default("fa-solid fa-circle")
+  status        Int        @default(1)
+  serial        Int        @default(0)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  parent        MenuItem?  @relation("MenuTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children      MenuItem[] @relation("MenuTree")
+
+  @@index([parentId, serial])
+  @@index([status, serial])
+}
+
+model Asset {
+  id           String   @id @default(uuid())
+  fieldName    String
+  originalName String
+  mimeType     String
+  size         Int
+  bytes        Bytes
+  createdAt    DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  accountId  String?
+  action     String
+  resource   String
+  resourceId String?
+  details    Json?
+  requestId  String?
+  createdAt  DateTime @default(now())
+  account    Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+
+  @@index([resource, createdAt])
+  @@index([accountId, createdAt])
+}

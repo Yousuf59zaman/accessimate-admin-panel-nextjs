@@ -1,4 +1,4 @@
-export default {
+const fontCatalog = {
   fontAwesome: {
     title: 'Font Awesome',
     variants: {
@@ -1090,4 +1090,6 @@ export default {
       },
     }
   }
-}
+};
+
+export default fontCatalog;

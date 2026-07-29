@@ -179,13 +179,22 @@ export default function AddEdit({
   );
 
   useEffect(() => {
-    if (isOpen) {
-      fetchAdmin("admin/news-categories").then((res: any) => {
-        if (res?.data?.data) {
-          setCategories(res.data.data);
-        }
-      });
-    }
+    if (!isOpen) return;
+    let isCurrent = true;
+    const loadCategories = async () => {
+      try {
+        const response = await fetchAdmin<{
+          data?: { data?: { id: number; title: string }[] };
+        }>("admin/news-categories");
+        if (isCurrent) setCategories(response.data?.data ?? []);
+      } catch {
+        if (isCurrent) setCategories([]);
+      }
+    };
+    void loadCategories();
+    return () => {
+      isCurrent = false;
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -263,7 +272,7 @@ export default function AddEdit({
     setIsLoading(true);
     setResponseModal({});
     try {
-      const submitData = {
+      const submitData: Partial<FormData> = {
         ...formData,
         status: isChecked ? 1 : 0,
         is_external: isCheckedExternal ? 1 : 0,
@@ -275,14 +284,14 @@ export default function AddEdit({
         (submitData.photo.includes("http") ||
           submitData.photo.includes("https"))
       ) {
-        delete (submitData as any).photo;
+        delete submitData.photo;
       }
       if (
         submitData.thumbnail_image &&
         (submitData.thumbnail_image.includes("http") ||
           submitData.thumbnail_image.includes("https"))
       ) {
-        delete (submitData as any).thumbnail_image;
+        delete submitData.thumbnail_image;
       }
 
       const isEdit = modalTitle !== "Create";

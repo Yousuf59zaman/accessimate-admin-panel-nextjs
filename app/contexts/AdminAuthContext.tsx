@@ -2,33 +2,47 @@
 
 import React, {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
 } from "react";
-import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
-import { fetchAdmin, XADM_TOKEN } from "@/app/lib/fetchAdmin";
+import { usePathname, useRouter } from "next/navigation";
+import { fetchAdmin } from "@/app/lib/fetchAdmin";
 
 const LOGIN_ENDPOINT = "/admin/login";
+const DEMO_LOGIN_ENDPOINT = "/admin/demo-login";
 const LOGOUT_ENDPOINT = "/admin/logout";
 const CURRENT_USER_ENDPOINT = "/admin/user";
 
-interface AdminUser {
-  id?: number;
+export interface AdminUser {
+  id?: string;
   name?: string;
   email?: string;
   login_id?: string;
+  user_info?: {
+    first_name?: string;
+    last_name?: string;
+  };
+  roles?: string[];
+  permissions?: string[];
+  is_demo?: boolean;
   [key: string]: unknown;
 }
 
 interface LoginResponse {
+  status?: boolean;
+  message?: string;
   data?: {
-    token?: string;
+    user?: AdminUser;
     [key: string]: unknown;
   };
-  [key: string]: unknown;
+}
+
+interface CurrentUserResponse {
+  status?: boolean;
+  data?: AdminUser;
 }
 
 interface AdminAuthContextType {
@@ -39,6 +53,7 @@ interface AdminAuthContextType {
     login_id: string;
     password: string;
   }) => Promise<LoginResponse | undefined>;
+  demoLogin: () => Promise<LoginResponse>;
   logout: () => Promise<void>;
 }
 
@@ -50,80 +65,110 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
+  const isAdminRoute = pathname.startsWith("/admin-panel");
 
-  const isAdminLoggedIn = !!adminUser;
+  const hydrateCurrentUser = useCallback(async () => {
+    const response = await fetchAdmin<CurrentUserResponse>(
+      CURRENT_USER_ENDPOINT,
+      { method: "POST" },
+    );
+    const user = response.data ?? null;
+    setAdminUser(user);
+    return user;
+  }, []);
 
-  // Fetch current user on mount (replaces plugins/authAdmin.ts)
   useEffect(() => {
-    const fetchCurrentUser = async () => {
-      const token = Cookies.get(XADM_TOKEN);
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
+    if (!isAdminRoute) {
+      setIsLoading(false);
+      return;
+    }
 
+    setIsLoading(true);
+    const hydrate = async () => {
       try {
-        const response = (await fetchAdmin(CURRENT_USER_ENDPOINT, {
-          method: "POST",
-        })) as Record<string, unknown>;
-        const data = (response?.data ?? response) as AdminUser;
-        setAdminUser(data);
-      } catch (error: unknown) {
-        const err = error as Record<string, Record<string, number>>;
-        if ([401, 400, 419].includes(err?.response?.status)) {
-          setAdminUser(null);
-        }
+        await hydrateCurrentUser();
+      } catch {
+        setAdminUser(null);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchCurrentUser();
-  }, []);
+    void hydrate();
+  }, [hydrateCurrentUser, isAdminRoute]);
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setAdminUser(null);
+      setIsLoading(false);
+      router.replace("/admin-login");
+      router.refresh();
+    };
+    window.addEventListener(
+      "accessimate:admin-unauthorized",
+      handleUnauthorized,
+    );
+    return () =>
+      window.removeEventListener(
+        "accessimate:admin-unauthorized",
+        handleUnauthorized,
+      );
+  }, [router]);
+
+  const enterPanel = useCallback(async () => {
+    await hydrateCurrentUser();
+    router.replace("/admin-panel");
+    router.refresh();
+  }, [hydrateCurrentUser, router]);
 
   const login = useCallback(
     async (credentials: { login_id: string; password: string }) => {
-      if (isAdminLoggedIn) return;
-
+      if (adminUser) return undefined;
       const response = await fetchAdmin<LoginResponse>(LOGIN_ENDPOINT, {
         method: "POST",
-        body: credentials as unknown as Record<string, unknown>,
+        body: credentials,
       });
-
-      // Set the token cookie
-      if (response?.data?.token) {
-        Cookies.set(XADM_TOKEN, response.data.token, { expires: 7 });
-      }
-
+      await enterPanel();
       return response;
     },
-    [isAdminLoggedIn],
+    [adminUser, enterPanel],
   );
 
-  const logout = useCallback(async () => {
-    if (!isAdminLoggedIn) return;
+  const demoLogin = useCallback(async () => {
+    const response = await fetchAdmin<LoginResponse>(DEMO_LOGIN_ENDPOINT, {
+      method: "POST",
+    });
+    await enterPanel();
+    return response;
+  }, [enterPanel]);
 
+  const logout = useCallback(async () => {
     try {
       await fetchAdmin(LOGOUT_ENDPOINT, { method: "POST" });
     } catch {
-      // Ignore logout API errors
+      // The BFF clears the session on logout and invalid-session responses.
+    } finally {
+      setAdminUser(null);
+      router.replace("/");
+      router.refresh();
     }
+  }, [router]);
 
-    setAdminUser(null);
-    Cookies.remove(XADM_TOKEN);
-    router.push("/");
-  }, [isAdminLoggedIn, router]);
+  const value = useMemo(
+    () => ({
+      adminUser,
+      isAdminLoggedIn: Boolean(adminUser),
+      isLoading,
+      login,
+      demoLogin,
+      logout,
+    }),
+    [adminUser, demoLogin, isLoading, login, logout],
+  );
 
   return (
-    <AdminAuthContext.Provider
-      value={{
-        adminUser,
-        isAdminLoggedIn,
-        isLoading,
-        login,
-        logout,
-      }}
-    >
+    <AdminAuthContext.Provider value={value}>
       {children}
     </AdminAuthContext.Provider>
   );

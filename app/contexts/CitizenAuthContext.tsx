@@ -2,35 +2,39 @@
 
 import React, {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
 } from "react";
-import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
-import { signInWithPopup } from "firebase/auth";
-import { fetchCitizen, XCTN_TOKEN } from "@/app/lib/fetchCitizen";
-import { auth, googleProvider, facebookProvider } from "@/app/lib/firebase";
+import { usePathname, useRouter } from "next/navigation";
+import { fetchCitizen } from "@/app/lib/fetchCitizen";
 
 const LOGIN_ENDPOINT = "/customer/login";
+const DEMO_LOGIN_ENDPOINT = "/customer/demo-login";
 const LOGOUT_ENDPOINT = "/customer/logout";
 const CURRENT_USER_ENDPOINT = "/customer/user";
-const SSO_LOGIN_ENDPOINT = "/customer/sso-login";
 
-interface CitizenUser {
-  id?: number;
+export interface CitizenUser {
+  id?: string;
   name?: string;
   email?: string;
+  login_id?: string;
+  roles?: string[];
+  is_demo?: boolean;
   [key: string]: unknown;
 }
 
 interface LoginResponse {
-  data?: {
-    token?: string;
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
+  status?: boolean;
+  message?: string;
+  data?: { user?: CitizenUser; [key: string]: unknown };
+}
+
+interface CurrentUserResponse {
+  status?: boolean;
+  data?: CitizenUser;
 }
 
 interface CitizenAuthContextType {
@@ -41,8 +45,7 @@ interface CitizenAuthContextType {
     login_id: string;
     password: string;
   }) => Promise<LoginResponse | undefined>;
-  googleLogin: () => Promise<LoginResponse | undefined>;
-  facebookLogin: () => Promise<LoginResponse | undefined>;
+  demoLogin: () => Promise<LoginResponse>;
   logout: () => Promise<void>;
 }
 
@@ -58,126 +61,109 @@ export function CitizenAuthProvider({
   const [citizenUser, setCitizenUser] = useState<CitizenUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
+  const isCitizenRoute = pathname.startsWith("/dashboard");
 
-  const isCitizenLoggedIn = !!citizenUser;
+  const hydrateCurrentUser = useCallback(async () => {
+    const response = await fetchCitizen<CurrentUserResponse>(
+      CURRENT_USER_ENDPOINT,
+      { method: "POST" },
+    );
+    const user = response.data ?? null;
+    setCitizenUser(user);
+    return user;
+  }, []);
 
-  // Fetch current user on mount (replaces plugins/authCitizen.ts)
   useEffect(() => {
-    const fetchCurrentUser = async () => {
-      const token = Cookies.get(XCTN_TOKEN);
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
+    if (!isCitizenRoute) {
+      setIsLoading(false);
+      return;
+    }
 
+    setIsLoading(true);
+    const hydrate = async () => {
       try {
-        const response = (await fetchCitizen(CURRENT_USER_ENDPOINT, {
-          method: "POST",
-        })) as Record<string, unknown>;
-        const data = (response?.data ?? response) as CitizenUser;
-        setCitizenUser(data);
-      } catch (error: unknown) {
-        const err = error as Record<string, Record<string, number>>;
-        if ([401, 400, 419].includes(err?.response?.status)) {
-          setCitizenUser(null);
-        }
+        await hydrateCurrentUser();
+      } catch {
+        setCitizenUser(null);
       } finally {
         setIsLoading(false);
       }
     };
+    void hydrate();
+  }, [hydrateCurrentUser, isCitizenRoute]);
 
-    fetchCurrentUser();
-  }, []);
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setCitizenUser(null);
+      setIsLoading(false);
+      router.replace("/login");
+      router.refresh();
+    };
+    window.addEventListener(
+      "accessimate:citizen-unauthorized",
+      handleUnauthorized,
+    );
+    return () =>
+      window.removeEventListener(
+        "accessimate:citizen-unauthorized",
+        handleUnauthorized,
+      );
+  }, [router]);
+
+  const enterDashboard = useCallback(async () => {
+    await hydrateCurrentUser();
+    router.replace("/dashboard");
+    router.refresh();
+  }, [hydrateCurrentUser, router]);
 
   const login = useCallback(
     async (credentials: { login_id: string; password: string }) => {
-      if (isCitizenLoggedIn) return;
-
+      if (citizenUser) return undefined;
       const response = await fetchCitizen<LoginResponse>(LOGIN_ENDPOINT, {
         method: "POST",
-        body: credentials as unknown as Record<string, unknown>,
+        body: credentials,
       });
-
-      // Set the token cookie
-      if (response?.data?.token) {
-        Cookies.set(XCTN_TOKEN, response.data.token, { expires: 7 });
-      }
-
+      await enterDashboard();
       return response;
     },
-    [isCitizenLoggedIn],
+    [citizenUser, enterDashboard],
   );
 
-  const googleLogin = useCallback(async () => {
-    if (isCitizenLoggedIn) return;
-
-    // Clear SID cookie if present
-    Cookies.remove("SID");
-
-    googleProvider.setCustomParameters({ prompt: "select_account" });
-    const result = await signInWithPopup(auth, googleProvider);
-    const idToken = await result.user.getIdToken();
-
-    const response = await fetchCitizen<LoginResponse>(SSO_LOGIN_ENDPOINT, {
+  const demoLogin = useCallback(async () => {
+    const response = await fetchCitizen<LoginResponse>(DEMO_LOGIN_ENDPOINT, {
       method: "POST",
-      body: { idToken },
     });
-
-    if (response?.data?.token) {
-      Cookies.set(XCTN_TOKEN, response.data.token, { expires: 7 });
-    }
-
+    await enterDashboard();
     return response;
-  }, [isCitizenLoggedIn]);
-
-  const facebookLogin = useCallback(async () => {
-    if (isCitizenLoggedIn) return;
-
-    // Clear SID cookie if present
-    Cookies.remove("SID");
-
-    facebookProvider.setCustomParameters({ auth_type: "reauthenticate" });
-    const result = await signInWithPopup(auth, facebookProvider);
-    const idToken = await result.user.getIdToken();
-
-    const response = await fetchCitizen<LoginResponse>(SSO_LOGIN_ENDPOINT, {
-      method: "POST",
-      body: { idToken },
-    });
-
-    if (response?.data?.token) {
-      Cookies.set(XCTN_TOKEN, response.data.token, { expires: 7 });
-    }
-
-    return response;
-  }, [isCitizenLoggedIn]);
+  }, [enterDashboard]);
 
   const logout = useCallback(async () => {
-    if (!isCitizenLoggedIn) return;
-
     try {
       await fetchCitizen(LOGOUT_ENDPOINT, { method: "POST" });
     } catch {
-      // Ignore logout API errors
+      // The BFF clears the session on logout and invalid-session responses.
+    } finally {
+      setCitizenUser(null);
+      router.replace("/");
+      router.refresh();
     }
+  }, [router]);
 
-    setCitizenUser(null);
-    Cookies.remove(XCTN_TOKEN);
-    router.push("/");
-  }, [isCitizenLoggedIn, router]);
+  const value = useMemo(
+    () => ({
+      citizenUser,
+      isCitizenLoggedIn: Boolean(citizenUser),
+      isLoading,
+      login,
+      demoLogin,
+      logout,
+    }),
+    [citizenUser, demoLogin, isLoading, login, logout],
+  );
 
   return (
-    <CitizenAuthContext.Provider
-      value={{
-        citizenUser,
-        isCitizenLoggedIn,
-        isLoading,
-        login,
-        googleLogin,
-        facebookLogin,
-        logout,
-      }}
-    >
+    <CitizenAuthContext.Provider value={value}>
       {children}
     </CitizenAuthContext.Provider>
   );

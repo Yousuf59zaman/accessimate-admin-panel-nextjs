@@ -12,20 +12,18 @@ export default function AdminLogin() {
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [form, setForm] = useState({ login_id: "", password: "" });
   const [unauthorizedError, setUnauthorizedError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAdminAuth();
+  const [loadingAction, setLoadingAction] = useState<"login" | "demo" | null>(
+    null,
+  );
+  const { login, demoLogin } = useAdminAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setLoadingAction("login");
     setUnauthorizedError("");
 
     try {
-      const response = await login(form);
-      if (response) {
-        window.location.href = "/admin-panel";
-        return;
-      }
+      await login(form);
     } catch (error: unknown) {
       if (error && typeof error === "object" && "data" in error) {
         const apiError = error as { data?: { message?: string } };
@@ -38,7 +36,23 @@ export default function AdminLogin() {
         );
       }
     } finally {
-      setIsLoading(false);
+      setLoadingAction(null);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setLoadingAction("demo");
+    setUnauthorizedError("");
+    try {
+      await demoLogin();
+    } catch (error: unknown) {
+      setUnauthorizedError(
+        error instanceof Error
+          ? error.message
+          : "Reviewer access is temporarily unavailable.",
+      );
+    } finally {
+      setLoadingAction(null);
     }
   };
 
@@ -101,10 +115,10 @@ export default function AdminLogin() {
             </div>
 
             <ButtonPrimary
-              disabled={isLoading}
-              className={`w-full py-4 rounded-xl text-[15px] font-semibold bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 transform hover:-translate-y-0.5 transition-all duration-200 ${isLoading ? "opacity-85" : ""}`}
+              disabled={loadingAction !== null}
+              className={`w-full py-4 rounded-xl text-[15px] font-semibold bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 transform hover:-translate-y-0.5 transition-all duration-200 ${loadingAction ? "opacity-85" : ""}`}
             >
-              {!isLoading ? (
+              {loadingAction !== "login" ? (
                 <span className="flex items-center justify-center gap-2">
                   Sign In <i className="fa fa-arrow-right"></i>
                 </span>
@@ -114,6 +128,22 @@ export default function AdminLogin() {
                 </div>
               )}
             </ButtonPrimary>
+
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              disabled={loadingAction !== null}
+              className="w-full rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300"
+            >
+              {loadingAction === "demo"
+                ? "Opening reviewer workspace…"
+                : "Explore read-only reviewer demo"}
+            </button>
+
+            <p className="text-center text-xs leading-5 text-slate-500 dark:text-slate-400">
+              Reviewer mode uses a secure HttpOnly session and blocks all data
+              mutations.
+            </p>
 
             <div className="min-h-4">
               <InputError message={unauthorizedError} />

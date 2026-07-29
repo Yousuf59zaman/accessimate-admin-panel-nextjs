@@ -21,7 +21,7 @@ interface FooterRow {
   title: string;
   link: string;
   url: string;
-  status: number | boolean;
+  status: number;
   group_type?: GroupType | null;
 }
 
@@ -323,7 +323,7 @@ function FootersPageInner() {
 
   const totalFooters = paginationData?.total ?? visibleFooterCount;
 
-  const pageTokens = useMemo(() => {
+  const pageTokens = useMemo<Array<number | "ellipsis">>(() => {
     if (!paginationData) return [];
 
     const { current_page: currentPage, last_page: lastPage } = paginationData;
@@ -427,7 +427,7 @@ function FootersPageInner() {
 
       <div className="space-y-3">
         {group.items.map((row) => {
-          const isActive = row.status === 1 || row.status === true;
+          const isActive = row.status === 1;
           const isTrashed = status.key === "trashed";
           const displayLink = row.link || row.url;
 

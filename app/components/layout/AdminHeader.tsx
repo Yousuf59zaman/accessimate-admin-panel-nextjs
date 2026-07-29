@@ -26,14 +26,12 @@ export default function AdminHeader() {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  const userData = adminUser as Record<string, Record<string, unknown>> | null;
-  const userInfo = (userData?.data?.user_info ||
-    userData?.user_info ||
-    userData) as Record<string, string> | null;
-  const userEmail = (userData?.data?.email || userData?.email || "") as string;
-  const firstName = userInfo?.first_name || "";
-  const lastName = userInfo?.last_name || "";
-  const fullName = `${firstName} ${lastName}`.trim() || "Admin";
+  const firstName = adminUser?.user_info?.first_name ?? "";
+  const lastName = adminUser?.user_info?.last_name ?? "";
+  const fullName =
+    `${firstName} ${lastName}`.trim() || adminUser?.name || "Admin";
+  const userEmail = adminUser?.email ?? "";
+  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}` || "A";
 
   return (
     <nav
@@ -78,6 +76,11 @@ export default function AdminHeader() {
           </div>
 
           <div className="flex items-center gap-2">
+            {adminUser?.is_demo && (
+              <span className="hidden rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 sm:inline-flex">
+                Reviewer · read only
+              </span>
+            )}
             {/* Color mode toggle */}
             <ColorModeToggle />
 
@@ -88,14 +91,12 @@ export default function AdminHeader() {
                   e.stopPropagation();
                   setShowDropdown(!showDropdown);
                 }}
+                aria-label="Open account menu"
                 className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
-                  alt="Avatar"
-                  className="w-9 h-9 rounded-xl border-2 border-slate-200 dark:border-slate-600 object-cover shadow-sm"
-                />
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border-2 border-slate-200 bg-gradient-to-br from-blue-500 to-sky-400 text-xs font-black uppercase text-white shadow-sm dark:border-slate-600">
+                  {initials}
+                </span>
               </button>
 
               {/* Dropdown menu */}
@@ -118,12 +119,9 @@ export default function AdminHeader() {
 
                   <div className="p-4 border-b border-slate-100 dark:border-slate-700/50">
                     <div className="flex items-center gap-3">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
-                        alt="Avatar"
-                        className="w-11 h-11 rounded-xl border-2 border-slate-200 dark:border-slate-600 object-cover"
-                      />
+                      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-2 border-slate-200 bg-gradient-to-br from-blue-500 to-sky-400 text-sm font-black uppercase text-white dark:border-slate-600">
+                        {initials}
+                      </span>
                       <div className="flex flex-col min-w-0">
                         <span className="font-semibold text-slate-900 dark:text-white truncate text-sm">
                           {fullName}
@@ -138,7 +136,7 @@ export default function AdminHeader() {
                     <button
                       onClick={() => {
                         setShowDropdown(false);
-                        logout();
+                        void logout();
                       }}
                       className="w-full px-3 py-2.5 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors duration-150 flex items-center gap-2.5 font-medium"
                     >

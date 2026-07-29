@@ -1,13 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "dev-api.accessimate.com",
-      },
-    ],
+  turbopack: {
+    root: process.cwd(),
   },
 };
 

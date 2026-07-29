@@ -71,7 +71,7 @@ export default function AddEdit({
       if (typeof item.param === "string") {
         try {
           parsedParam = JSON.parse(item.param);
-        } catch (e) {
+        } catch {
           parsedParam = {};
         }
       } else if (item.param && typeof item.param === "object") {
@@ -153,7 +153,7 @@ export default function AddEdit({
         isEdit
           ? `admin/payment-gateways/${item?.id}`
           : "admin/payment-gateways",
-        { method: isEdit ? "PUT" : "POST", body: submitData as any },
+        { method: isEdit ? "PUT" : "POST", body: submitData },
       );
       if (result?.status === true) {
         setResponseModal(result as unknown as Record<string, unknown>);
