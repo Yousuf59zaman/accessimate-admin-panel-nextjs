@@ -91,15 +91,25 @@ export class AuthService {
   }
 
   private accountDto(account: Account) {
+    const profile =
+      account.profile && typeof account.profile === 'object' && !Array.isArray(account.profile)
+        ? account.profile
+        : {};
     return {
       id: account.id,
       name: `${account.firstName} ${account.lastName}`.trim(),
       email: account.email,
       login_id: account.loginId,
+      mobile: account.mobile,
+      ccode: account.countryCode,
+      photo: account.photoUrl,
       user_info: {
         first_name: account.firstName,
+        middle_name:
+          typeof profile.middleName === 'string' ? profile.middleName : '',
         last_name: account.lastName,
       },
+      user_account_detail: { api_key: account.apiKey },
       roles: account.roles,
       permissions: account.permissions,
       is_demo: account.isDemo,

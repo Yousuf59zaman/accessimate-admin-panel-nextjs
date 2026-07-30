@@ -12,24 +12,224 @@ enum AccountType {
   CITIZEN
 }
 
+enum WebsiteStatus {
+  FREE
+  TRIAL
+  PAID
+  EXPIRED
+}
+
+enum ScanType {
+  SINGLE
+  SITE
+}
+
+enum ScanStatus {
+  COMPLETED
+  FAILED
+}
+
+enum SubscriptionType {
+  TRIAL
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PENDING
+  EXPIRED
+}
+
+enum InvoiceStatus {
+  PAID
+  PENDING
+  OVERDUE
+}
+
+enum PaymentStatus {
+  COMPLETED
+  PENDING
+  FAILED
+}
+
+enum PdfRemediationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  ACCESSIBLE
+  NEEDS_REMEDIATION
+}
+
+enum SupportRequestStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
 model Account {
-  id           String      @id @default(uuid())
-  loginId      String      @unique
-  email        String      @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  type         AccountType
-  isDemo       Boolean     @default(false)
-  isActive     Boolean     @default(true)
-  roles        String[]
-  permissions  String[]
-  profile      Json?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  auditLogs    AuditLog[]
+  id              String                      @id @default(uuid())
+  loginId         String                      @unique
+  email           String                      @unique
+  passwordHash    String
+  firstName       String
+  lastName        String
+  type            AccountType
+  isDemo          Boolean                     @default(false)
+  isActive        Boolean                     @default(true)
+  roles           String[]
+  permissions     String[]
+  profile         Json?
+  mobile          String?
+  countryCode     String?
+  photoUrl        String?
+  apiKey          String?                     @unique
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+  auditLogs       AuditLog[]
+  websites        CitizenWebsite[]
+  scans           AccessibilityScan[]
+  subscriptions   CitizenSubscription[]
+  invoices        CitizenInvoice[]
+  payments        CitizenPaymentTransaction[]
+  pdfRemediations PdfRemediation[]
+  supportRequests SupportRequest[]
 
   @@index([type, isActive])
+}
+
+model CitizenWebsite {
+  id          Int                 @id @default(autoincrement())
+  accountId   String
+  name        String
+  url         String
+  status      WebsiteStatus       @default(TRIAL)
+  planName    String?
+  trialEndsAt DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  account     Account             @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  scans       AccessibilityScan[]
+
+  @@unique([accountId, url])
+  @@index([accountId, status, updatedAt])
+}
+
+model AccessibilityScan {
+  id              String         @id @default(uuid())
+  accountId       String
+  websiteId       Int
+  scanType        ScanType
+  scanStatus      ScanStatus     @default(COMPLETED)
+  scannedUrl      String
+  system          String         @default("Accessimate Engine")
+  verdict         String
+  wcagVersion     String
+  complianceLevel String
+  issues          Json
+  issueCategories Json
+  issuesFound     Int            @default(0)
+  errorsCount     Int            @default(0)
+  warningsCount   Int            @default(0)
+  noticesCount    Int            @default(0)
+  pagesScanned    Int            @default(1)
+  pagesWithIssues Int            @default(0)
+  scanDurationMs  Int            @default(0)
+  createdAt       DateTime       @default(now())
+  account         Account        @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  website         CitizenWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, createdAt])
+  @@index([websiteId, createdAt])
+}
+
+model CitizenSubscription {
+  id              String                      @id @default(uuid())
+  accountId       String
+  planName        String
+  planDescription String
+  planSlug        String
+  amount          Decimal                     @db.Decimal(10, 2)
+  currency        String                      @default("USD")
+  type            SubscriptionType
+  status          SubscriptionStatus          @default(ACTIVE)
+  startDate       DateTime
+  nextBillingDate DateTime
+  autoRenew       Boolean                     @default(true)
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+  account         Account                     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  invoices        CitizenInvoice[]
+  payments        CitizenPaymentTransaction[]
+
+  @@index([accountId, status])
+}
+
+model CitizenInvoice {
+  id             String              @id @default(uuid())
+  accountId      String
+  subscriptionId String
+  billAmount     Decimal             @db.Decimal(10, 2)
+  currency       String              @default("USD")
+  billDate       DateTime
+  paymentDueDate DateTime
+  status         InvoiceStatus       @default(PENDING)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  account        Account             @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  subscription   CitizenSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, billDate])
+  @@index([subscriptionId, status])
+}
+
+model CitizenPaymentTransaction {
+  id             String               @id @default(uuid())
+  accountId      String
+  subscriptionId String?
+  externalId     String               @unique
+  gateway        String
+  planName       String
+  amount         Decimal              @db.Decimal(10, 2)
+  currency       String               @default("USD")
+  status         PaymentStatus
+  metadata       Json?
+  createdAt      DateTime             @default(now())
+  account        Account              @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  subscription   CitizenSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([accountId, createdAt])
+}
+
+model PdfRemediation {
+  id           String               @id @default(uuid())
+  accountId    String
+  originalName String
+  mimeType     String
+  size         Int
+  bytes        Bytes
+  status       PdfRemediationStatus @default(SUBMITTED)
+  issueCount   Int?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  account      Account              @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, createdAt])
+  @@index([accountId, status])
+}
+
+model SupportRequest {
+  id          String               @id @default(uuid())
+  accountId   String
+  kind        String
+  subject     String
+  message     String
+  preferredAt DateTime?
+  status      SupportRequestStatus @default(OPEN)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  account     Account              @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, status, createdAt])
 }
 
 model ResourceRecord {

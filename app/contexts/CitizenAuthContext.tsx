@@ -47,6 +47,7 @@ interface CitizenAuthContextType {
   }) => Promise<LoginResponse | undefined>;
   demoLogin: () => Promise<LoginResponse>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<CitizenUser | null>;
 }
 
 const CitizenAuthContext = createContext<CitizenAuthContextType | undefined>(
@@ -62,7 +63,16 @@ export function CitizenAuthProvider({
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
-  const isCitizenRoute = pathname.startsWith("/dashboard");
+  const isCitizenRoute = [
+    "/dashboard",
+    "/audit",
+    "/accessibility",
+    "/embeded-code",
+    "/developer-resourse",
+    "/document-pdf",
+    "/billing-payments",
+    "/settings",
+  ].some((route) => pathname === route || pathname.startsWith(`${route}/`));
 
   const hydrateCurrentUser = useCallback(async () => {
     const response = await fetchCitizen<CurrentUserResponse>(
@@ -158,8 +168,9 @@ export function CitizenAuthProvider({
       login,
       demoLogin,
       logout,
+      refreshUser: hydrateCurrentUser,
     }),
-    [citizenUser, demoLogin, isLoading, login, logout],
+    [citizenUser, demoLogin, hydrateCurrentUser, isLoading, login, logout],
   );
 
   return (

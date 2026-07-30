@@ -12,6 +12,8 @@ describe('Accessimate API (e2e)', () => {
   let prisma: PrismaService;
   let reviewerToken = '';
   let ownerToken = '';
+  let citizenToken = '';
+  let demoCitizenToken = '';
   let createdResourceId: number | undefined;
   let createdAssetId: string | undefined;
   const loginId = `e2e-owner-${Date.now()}`;
@@ -19,6 +21,11 @@ describe('Accessimate API (e2e)', () => {
   const password = 'E2eOwnerOnly2026!';
   const uniqueTitle = `E2E release ${Date.now()}`;
   const identityValue = uniqueTitle.toLowerCase();
+  const citizenLoginId = `e2e-citizen-${Date.now()}`;
+  const citizenEmail = `${citizenLoginId}@accessimate.test`;
+  const citizenPassword = 'E2eCitizenOnly2026!';
+  const citizenNewPassword = 'E2eCitizenUpdated2026!';
+  const citizenWebsiteUrl = `https://example.com/e2e-${Date.now()}`;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -47,17 +54,36 @@ describe('Accessimate API (e2e)', () => {
         ],
       },
     });
+    await prisma.account.create({
+      data: {
+        loginId: citizenLoginId,
+        email: citizenEmail,
+        passwordHash: await hash(citizenPassword, 12),
+        firstName: 'Citizen',
+        lastName: 'Tester',
+        type: 'CITIZEN',
+        roles: ['citizen'],
+        permissions: ['dashboard.view'],
+        apiKey: `am_${citizenLoginId}`,
+        countryCode: '880',
+      },
+    });
   });
 
   afterAll(async () => {
-    await prisma.auditLog.deleteMany({ where: { account: { loginId } } });
+    if (!prisma || !app) return;
+    await prisma.auditLog.deleteMany({
+      where: { account: { loginId: { in: [loginId, citizenLoginId] } } },
+    });
     await prisma.resourceRecord.deleteMany({
       where: { resource: 'news', identityValue },
     });
     if (createdAssetId) {
       await prisma.asset.deleteMany({ where: { id: createdAssetId } });
     }
-    await prisma.account.deleteMany({ where: { loginId } });
+    await prisma.account.deleteMany({
+      where: { loginId: { in: [loginId, citizenLoginId] } },
+    });
     await app.close();
   });
 
@@ -146,7 +172,11 @@ describe('Accessimate API (e2e)', () => {
     const created = await request(app.getHttpServer())
       .post('/api/v1/admin/news')
       .set('authorization', `Bearer ${ownerToken}`)
-      .send({ title: uniqueTitle, slug: identityValue.replaceAll(' ', '-'), status: 1 })
+      .send({
+        title: uniqueTitle,
+        slug: identityValue.replaceAll(' ', '-'),
+        status: 1,
+      })
       .expect(201);
     createdResourceId = created.body.data.id as number;
     expect(created.body.data.title).toBe(uniqueTitle);
@@ -211,14 +241,20 @@ describe('Accessimate API (e2e)', () => {
       .set('authorization', `Bearer ${reviewerToken}`)
       .expect(201);
     expect(menu.body.data[0]).toEqual(
-      expect.objectContaining({ name: expect.any(String), route: expect.any(String), child: expect.any(Array) }),
+      expect.objectContaining({
+        name: expect.any(String),
+        route: expect.any(String),
+        child: expect.any(Array),
+      }),
     );
 
     const dashboard = await request(app.getHttpServer())
       .get('/api/v1/admin/dashboard/overview')
       .set('authorization', `Bearer ${reviewerToken}`)
       .expect(200);
-    expect(dashboard.body.data.totals.active_records).toEqual(expect.any(Number));
+    expect(dashboard.body.data.totals.active_records).toEqual(
+      expect.any(Number),
+    );
     expect(dashboard.body.data.resources).toEqual(expect.any(Array));
     expect(dashboard.body.data.activity_by_day).toHaveLength(7);
   });
@@ -228,12 +264,222 @@ describe('Accessimate API (e2e)', () => {
       .post('/api/v1/customer/demo-login')
       .expect(201);
     const token = login.body.data.token as string;
+    demoCitizenToken = token;
 
     const currentUser = await request(app.getHttpServer())
       .post('/api/v1/customer/user')
       .set('authorization', `Bearer ${token}`)
       .expect(201);
     expect(currentUser.body.data.roles).toContain('citizen');
+    expect(currentUser.body.data.user_account_detail.api_key).toEqual(
+      expect.any(String),
+    );
+  });
+
+  it('authenticates a writable citizen without exposing the token in account data', async () => {
+    const login = await request(app.getHttpServer())
+      .post('/api/v1/customer/login')
+      .send({ login_id: citizenLoginId, password: citizenPassword })
+      .expect(201);
+    citizenToken = login.body.data.token as string;
+    expect(login.body.data.user.user_account_detail.api_key).toBe(
+      `am_${citizenLoginId}`,
+    );
+    expect(login.body.data.user.token).toBeUndefined();
+  });
+
+  it('supports an owner-scoped citizen website CRUD lifecycle', async () => {
+    const created = await request(app.getHttpServer())
+      .post('/api/v1/customer/websites')
+      .set('authorization', `Bearer ${citizenToken}`)
+      .send({ name: 'E2E accessibility website', url: citizenWebsiteUrl })
+      .expect(201);
+    const websiteId = created.body.data.id as number;
+    expect(created.body.data.status).toBe('trial');
+
+    const updated = await request(app.getHttpServer())
+      .put(`/api/v1/customer/websites/${websiteId}`)
+      .set('authorization', `Bearer ${citizenToken}`)
+      .send({ name: 'Updated E2E website', url: citizenWebsiteUrl })
+      .expect(200);
+    expect(updated.body.data.name).toBe('Updated E2E website');
+
+    const websites = await request(app.getHttpServer())
+      .get('/api/v1/customer/websites')
+      .set('authorization', `Bearer ${citizenToken}`)
+      .expect(200);
+    expect(websites.body.data.data).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: websiteId })]),
+    );
+
+    await request(app.getHttpServer())
+      .get(`/api/v1/customer/websites/${websiteId}`)
+      .set('authorization', `Bearer ${demoCitizenToken}`)
+      .expect(404);
+
+    const foreignScan = await request(app.getHttpServer())
+      .post('/api/v1/customer/scan')
+      .set('authorization', `Bearer ${citizenToken}`)
+      .send({
+        website_id: websiteId,
+        url: 'https://example.org/not-the-registered-origin',
+      })
+      .expect(400);
+    expect(foreignScan.body.message).toContain('same origin');
+
+    await request(app.getHttpServer())
+      .delete(`/api/v1/customer/websites/${websiteId}`)
+      .set('authorization', `Bearer ${citizenToken}`)
+      .expect(200);
+  });
+
+  it('returns real citizen resources while keeping reviewer mutations blocked', async () => {
+    const [
+      overview,
+      scans,
+      accessibility,
+      invoices,
+      subscription,
+      payments,
+      pdfs,
+      resources,
+      embed,
+    ] = await Promise.all([
+      request(app.getHttpServer())
+        .get('/api/v1/customer/portal/overview')
+        .set('authorization', `Bearer ${demoCitizenToken}`),
+      request(app.getHttpServer())
+        .get('/api/v1/customer/scan-history')
+        .set('authorization', `Bearer ${demoCitizenToken}`),
+      request(app.getHttpServer())
+        .get('/api/v1/customer/accessibility-overview')
+        .set('authorization', `Bearer ${demoCitizenToken}`),
+      request(app.getHttpServer())
+        .get('/api/v1/customer/billing/invoices')
+        .set('authorization', `Bearer ${demoCitizenToken}`),
+      request(app.getHttpServer())
+        .get('/api/v1/customer/subscriptions/my-subscriptions')
+        .set('authorization', `Bearer ${demoCitizenToken}`),
+      request(app.getHttpServer())
+        .get('/api/v1/customer/payment-transactions/my-transactions')
+        .set('authorization', `Bearer ${demoCitizenToken}`),
+      request(app.getHttpServer())
+        .get('/api/v1/customer/pdf-remediations')
+        .set('authorization', `Bearer ${demoCitizenToken}`),
+      request(app.getHttpServer())
+        .get('/api/v1/customer/developer-resources')
+        .set('authorization', `Bearer ${demoCitizenToken}`),
+      request(app.getHttpServer())
+        .get('/api/v1/customer/embed-config')
+        .set('authorization', `Bearer ${demoCitizenToken}`),
+    ]);
+    [
+      overview,
+      scans,
+      accessibility,
+      invoices,
+      subscription,
+      payments,
+      pdfs,
+      resources,
+      embed,
+    ].forEach((response) => expect(response.status).toBe(200));
+    expect(overview.body.data.totals.websites).toBeGreaterThanOrEqual(1);
+    expect(scans.body.data.length).toBeGreaterThanOrEqual(1);
+    expect(accessibility.body.data.sections.length).toBeGreaterThanOrEqual(1);
+    expect(subscription.body.data.status).toBe('active');
+    expect(payments.body.data.length).toBeGreaterThanOrEqual(1);
+    expect(resources.body.data.endpoints.length).toBeGreaterThanOrEqual(6);
+    expect(embed.body.data.embed_code).toContain('widget.js');
+
+    const blocked = await request(app.getHttpServer())
+      .post('/api/v1/customer/websites')
+      .set('authorization', `Bearer ${demoCitizenToken}`)
+      .send({ name: 'Blocked demo website', url: 'https://example.org/' })
+      .expect(403);
+    expect(blocked.body.message).toContain('read-only');
+  });
+
+  it('serves a functional public widget script without authentication', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/api/v1/public/widget.js')
+      .expect(200);
+    expect(response.headers['content-type']).toContain(
+      'application/javascript',
+    );
+    expect(response.text).toContain('Accessibility tools');
+    expect(response.text).toContain('am-high-contrast');
+
+    const preview = await request(app.getHttpServer())
+      .get('/api/v1/public/widget-preview?account=demo_citizen<script>')
+      .expect(200);
+    expect(preview.headers['content-type']).toContain('text/html');
+    expect(preview.headers['content-security-policy']).toContain(
+      'frame-ancestors https://accessimate-admin-panel-nextjs.vercel.app',
+    );
+    expect(preview.text).toContain('data-account="demo_citizenscript"');
+    expect(preview.text).toContain('/api/v1/public/widget.js');
+  });
+
+  it('validates, stores, lists, and ownership-protects citizen PDF files', async () => {
+    const bytes = Buffer.from('%PDF-1.4\n% e2e protected document\n%%EOF\n');
+    const uploaded = await request(app.getHttpServer())
+      .post('/api/v1/customer/pdf-remediations')
+      .set('authorization', `Bearer ${citizenToken}`)
+      .attach('files', bytes, {
+        filename: 'e2e-document.pdf',
+        contentType: 'application/pdf',
+      })
+      .expect(201);
+    const pdfId = uploaded.body.data[0].id as string;
+
+    const download = await request(app.getHttpServer())
+      .get(`/api/v1/customer/pdf-remediations/${pdfId}/download`)
+      .set('authorization', `Bearer ${citizenToken}`)
+      .expect(200);
+    expect(download.headers['content-type']).toContain('application/pdf');
+    expect(Buffer.from(download.body).subarray(0, 4).toString('ascii')).toBe(
+      '%PDF',
+    );
+
+    await request(app.getHttpServer())
+      .get(`/api/v1/customer/pdf-remediations/${pdfId}/download`)
+      .set('authorization', `Bearer ${demoCitizenToken}`)
+      .expect(404);
+  });
+
+  it('updates citizen profile and password through validated owner-only workflows', async () => {
+    const account = await prisma.account.findUniqueOrThrow({
+      where: { loginId: citizenLoginId },
+    });
+    const profile = await request(app.getHttpServer())
+      .post(`/api/v1/customer/account-information/${account.id}`)
+      .set('authorization', `Bearer ${citizenToken}`)
+      .send({
+        first_name: 'Citizen',
+        middle_name: 'API',
+        last_name: 'Tester',
+        email: citizenEmail,
+        ccode: '880',
+        mobile: '1700000000',
+      })
+      .expect(201);
+    expect(profile.body.data.user_info.middle_name).toBe('API');
+
+    await request(app.getHttpServer())
+      .post('/api/v1/customer/update-password')
+      .set('authorization', `Bearer ${citizenToken}`)
+      .send({
+        old_password: citizenPassword,
+        password: citizenNewPassword,
+        password_confirmation: citizenNewPassword,
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/customer/login')
+      .send({ login_id: citizenLoginId, password: citizenNewPassword })
+      .expect(201);
   });
 
   it('rejects invalid bearer tokens', async () => {

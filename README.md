@@ -34,8 +34,28 @@ Browser
 - Legacy Base64 form compatibility for the existing CMS upload controls
 - Live account, content, status, trash, and seven-day activity analytics
 - Audit records for owner mutations
+- Responsive citizen workspace for websites, audits, findings, embed code, developer resources, PDFs, billing records, and account settings
+- Owner-scoped citizen website CRUD, profile/password updates, PDF submission/download, support requests, and read-only reviewer enforcement
+- Server-side WCAG scanner with multi-page discovery, issue recommendations, persisted history, strict response limits, and SSRF/private-network protection
+- Account-bound public accessibility widget with text scaling, high contrast, link highlighting, keyboard interaction, and an executable preview
+- Persisted subscription, invoice, and payment-ledger views backed by the dedicated PostgreSQL database
 
 Social SSO and real payment-provider transactions are not presented as active features. Their UI/integration packages remain available for future provider configuration.
+
+## Citizen workspace
+
+The citizen journey follows the original Nuxt panel's information architecture while using original Next.js components and the independent NestJS API:
+
+- `/dashboard` — account metrics, latest scan, entitlement, and website management
+- `/audit` — protected live scans, WCAG options, history, and finding reports
+- `/accessibility` — category-level findings, score, severity, and recommendations
+- `/embeded-code` — account-bound installation script and running widget preview
+- `/developer-resourse` — live API catalog, base URL, API key, Swagger, and integration example
+- `/document-pdf` — validated PDF submission, persisted status, protected download, and support requests
+- `/billing-payments` — current subscription, invoices, and payment history
+- `/settings` — profile, image, country, password, and developer credentials
+
+The spelling of the two legacy-compatible paths is preserved so existing Nuxt links continue to work.
 
 ## Repository structure
 
@@ -95,7 +115,7 @@ pnpm --dir backend test:e2e
 pnpm --dir backend build
 ```
 
-The end-to-end suite uses a real PostgreSQL database and verifies health, both reviewer roles, all 34 CMS list contracts, validation, read-only enforcement, owner CRUD, soft delete/restore, large Base64 asset conversion and delivery, menu DTOs, dashboard analytics, and invalid-session rejection.
+The end-to-end suite uses a real PostgreSQL database and verifies health, both reviewer roles, all 34 CMS list contracts, validation, read-only enforcement, owner CRUD, soft delete/restore, large Base64 asset conversion and delivery, menu DTOs, dashboard analytics, citizen ownership boundaries, citizen resources, protected PDFs, account updates, public widget delivery, and invalid-session rejection.
 
 ## Deployment
 

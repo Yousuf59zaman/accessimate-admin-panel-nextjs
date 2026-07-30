@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AssetsModule } from './assets/assets.module';
 import { AuthModule } from './auth/auth.module';
+import { CitizenPortalModule } from './citizen-portal/citizen-portal.module';
 import { DemoMutationGuard } from './common/guards/demo-mutation.guard';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
@@ -33,6 +34,7 @@ import { ResourcesModule } from './resources/resources.module';
     }),
     PrismaModule,
     AuthModule,
+    CitizenPortalModule,
     AssetsModule,
     MenusModule,
     ResourcesModule,
