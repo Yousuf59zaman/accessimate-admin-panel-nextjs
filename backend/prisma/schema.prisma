@@ -93,6 +93,8 @@ model Account {
   payments        CitizenPaymentTransaction[]
   pdfRemediations PdfRemediation[]
   supportRequests SupportRequest[]
+  widgetOrigins   WidgetAllowedOrigin[]
+  widgetSessions  WidgetSession[]
 
   @@index([type, isActive])
 }
@@ -230,6 +232,34 @@ model SupportRequest {
   account     Account              @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@index([accountId, status, createdAt])
+}
+
+model WidgetAllowedOrigin {
+  id        String   @id @default(uuid())
+  accountId String
+  origin    String
+  createdAt DateTime @default(now())
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, origin])
+  @@index([origin])
+}
+
+model WidgetSession {
+  id               String   @id @default(uuid())
+  cacheKey         String   @unique
+  origin           String
+  apiKey           String
+  validationStatus String   @default("valid")
+  adjustments      Json
+  validatedAt      DateTime @default(now())
+  accountId        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  account          Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+
+  @@index([origin])
+  @@index([updatedAt])
 }
 
 model ResourceRecord {

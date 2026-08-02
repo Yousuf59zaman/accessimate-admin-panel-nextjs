@@ -10,6 +10,8 @@ An independently deployed multi-panel CMS built with Next.js, NestJS, Prisma, an
 
 Use **Open admin reviewer demo** or **Open citizen demo** on the landing page. Public reviewer accounts are intentionally read-only; private owner credentials are never stored in the repository or returned to the browser.
 
+The separate public guest route is available at `https://accessimate-admin-panel-nextjs.vercel.app/accessibility-widget`. It ports the Accessimate standalone widget from Express `dev` commit `c76c4abb49b3753fd201ea5bff794dc6a30adcd1`, with narrowly scoped same-origin configuration, PostgreSQL persistence/restoration, and lazy third-party translation loading for the new deployment. The original repository remains unchanged.
+
 ## Implemented architecture
 
 ```text
@@ -25,6 +27,7 @@ Browser
 - Filewise guest/admin/citizen access checks in route-group layouts
 - Same-origin BFF that keeps JWTs out of client JavaScript and API responses
 - Separate admin and citizen authentication journeys
+- Separate public route group with the original Accessimate widget view and no admin/citizen session requirement
 - NestJS 11 API with validation, request IDs, rate limiting, Helmet, CORS, and Swagger
 - Prisma 6 migrations and production-safe seed workflow
 - Neon PostgreSQL database dedicated to this project
@@ -34,6 +37,7 @@ Browser
 - Legacy Base64 form compatibility for the existing CMS upload controls
 - Live account, content, status, trash, and seven-day activity analytics
 - Audit records for owner mutations
+- Original `/api/cache/*` and typo-preserved `/api/customer/validete` widget contracts backed by PostgreSQL sessions and account/origin validation
 - Responsive citizen workspace for websites, audits, findings, embed code, developer resources, PDFs, billing records, and account settings
 - Owner-scoped citizen website CRUD, profile/password updates, PDF submission/download, support requests, and read-only reviewer enforcement
 - Server-side WCAG scanner with multi-page discovery, issue recommendations, persisted history, strict response limits, and SSRF/private-network protection

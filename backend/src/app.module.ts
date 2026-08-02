@@ -15,6 +15,7 @@ import { HealthModule } from './health/health.module';
 import { MenusModule } from './menus/menus.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ResourcesModule } from './resources/resources.module';
+import { WidgetModule } from './widget/widget.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ResourcesModule } from './resources/resources.module';
     MenusModule,
     ResourcesModule,
     DashboardModule,
+    WidgetModule,
     HealthModule,
   ],
   providers: [

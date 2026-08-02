@@ -329,6 +329,26 @@ const citizenPortal = async () => {
   }
 };
 
+const widgetAccess = async () => {
+  const citizen = await prisma.account.findUniqueOrThrow({
+    where: { loginId: 'citizen-reviewer' },
+  });
+
+  await prisma.widgetAllowedOrigin.upsert({
+    where: {
+      accountId_origin: {
+        accountId: citizen.id,
+        origin: '*',
+      },
+    },
+    update: {},
+    create: {
+      accountId: citizen.id,
+      origin: '*',
+    },
+  });
+};
+
 const resourceSeeds: Record<string, Record<string, unknown>[]> = {
   'auth-client': [
     { name: 'Portfolio CMS Client', email: 'cms@accessimate.demo', status: 1 },
@@ -621,6 +641,7 @@ const menus = async () => {
 const main = async () => {
   await accounts();
   await citizenPortal();
+  await widgetAccess();
   await resources();
   await menus();
 };

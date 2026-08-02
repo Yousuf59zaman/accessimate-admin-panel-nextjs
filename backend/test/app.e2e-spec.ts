@@ -26,6 +26,7 @@ describe('Accessimate API (e2e)', () => {
   const citizenPassword = 'E2eCitizenOnly2026!';
   const citizenNewPassword = 'E2eCitizenUpdated2026!';
   const citizenWebsiteUrl = `https://example.com/e2e-${Date.now()}`;
+  const widgetOrigin = 'https://widget-e2e.test';
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -66,6 +67,7 @@ describe('Accessimate API (e2e)', () => {
         permissions: ['dashboard.view'],
         apiKey: `am_${citizenLoginId}`,
         countryCode: '880',
+        widgetOrigins: { create: { origin: widgetOrigin } },
       },
     });
   });
@@ -81,6 +83,7 @@ describe('Accessimate API (e2e)', () => {
     if (createdAssetId) {
       await prisma.asset.deleteMany({ where: { id: createdAssetId } });
     }
+    await prisma.widgetSession.deleteMany({ where: { origin: widgetOrigin } });
     await prisma.account.deleteMany({
       where: { loginId: { in: [loginId, citizenLoginId] } },
     });
@@ -92,6 +95,60 @@ describe('Accessimate API (e2e)', () => {
       .get('/api/v1/health')
       .expect(200);
     expect(response.body.data.database).toBe('connected');
+  });
+
+  it('validates the original public widget account and origin contract', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/customer/validete')
+      .send({ api_key: `am_${citizenLoginId}`, origin: `${widgetOrigin}/page` })
+      .expect(201);
+
+    expect(response.body).toMatchObject({
+      status: true,
+      data: { origin: widgetOrigin },
+    });
+  });
+
+  it('persists, retrieves, updates, and clears the original widget cache contract', async () => {
+    await request(app.getHttpServer())
+      .post('/api/cache/store')
+      .send({
+        origin: widgetOrigin,
+        apiKey: `am_${citizenLoginId}`,
+        validationStatus: 'valid',
+        adjustments: { lineHeight: 1.75 },
+      })
+      .expect(201)
+      .expect(({ body }) => {
+        expect(body).toMatchObject({ success: true });
+      });
+
+    await request(app.getHttpServer())
+      .post('/api/cache/retrieve')
+      .send({ origin: widgetOrigin })
+      .expect(201)
+      .expect(({ body }) => {
+        expect(body).toMatchObject({
+          success: true,
+          data: { adjustments: { lineHeight: 1.75 } },
+        });
+      });
+
+    await request(app.getHttpServer())
+      .post('/api/cache/update-adjustments')
+      .send({ origin: widgetOrigin, adjustments: { contrast: true } })
+      .expect(201)
+      .expect(({ body }) => {
+        expect(body).toMatchObject({ success: true });
+      });
+
+    await request(app.getHttpServer())
+      .delete('/api/cache/clear')
+      .send({ origin: widgetOrigin })
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body).toMatchObject({ success: true });
+      });
   });
 
   it('creates and verifies a read-only reviewer session', async () => {
@@ -390,7 +447,8 @@ describe('Accessimate API (e2e)', () => {
     expect(subscription.body.data.status).toBe('active');
     expect(payments.body.data.length).toBeGreaterThanOrEqual(1);
     expect(resources.body.data.endpoints.length).toBeGreaterThanOrEqual(6);
-    expect(embed.body.data.embed_code).toContain('widget.js');
+    expect(embed.body.data.embed_code).toContain('/js/main.js');
+    expect(embed.body.data.preview_url).toContain('/accessibility-widget');
 
     const blocked = await request(app.getHttpServer())
       .post('/api/v1/customer/websites')
@@ -400,25 +458,16 @@ describe('Accessimate API (e2e)', () => {
     expect(blocked.body.message).toContain('read-only');
   });
 
-  it('serves a functional public widget script without authentication', async () => {
+  it('keeps widget validation public while rejecting an invalid key', async () => {
     const response = await request(app.getHttpServer())
-      .get('/api/v1/public/widget.js')
-      .expect(200);
-    expect(response.headers['content-type']).toContain(
-      'application/javascript',
-    );
-    expect(response.text).toContain('Accessibility tools');
-    expect(response.text).toContain('am-high-contrast');
+      .post('/api/customer/validete')
+      .send({ api_key: 'invalid-key', origin: 'https://unknown.test' })
+      .expect(201);
 
-    const preview = await request(app.getHttpServer())
-      .get('/api/v1/public/widget-preview?account=demo_citizen<script>')
-      .expect(200);
-    expect(preview.headers['content-type']).toContain('text/html');
-    expect(preview.headers['content-security-policy']).toContain(
-      'frame-ancestors https://accessimate-admin-panel-nextjs.vercel.app',
-    );
-    expect(preview.text).toContain('data-account="demo_citizenscript"');
-    expect(preview.text).toContain('/api/v1/public/widget.js');
+    expect(response.body).toEqual({
+      status: false,
+      message: 'Token invalid / Origin not allowed',
+    });
   });
 
   it('validates, stores, lists, and ownership-protects citizen PDF files', async () => {

@@ -43,6 +43,7 @@ export default function Home() {
             <span>Accessimate Control</span>
           </Link>
           <div className="flex items-center gap-4 text-sm font-semibold text-slate-300">
+            <Link href="/accessibility-widget" className="hidden transition hover:text-white md:inline">Live widget</Link>
             <Link href="/login" className="hidden transition hover:text-white sm:inline">Citizen</Link>
             <Link href="/admin-login" className="rounded-lg border border-white/15 px-4 py-2 transition hover:border-white/30 hover:bg-white/5">Admin sign in</Link>
           </div>

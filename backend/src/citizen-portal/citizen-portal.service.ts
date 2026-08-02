@@ -507,8 +507,8 @@ export class CitizenPortalService {
 
   async embedConfig(user: AuthenticatedUser) {
     const account = await this.account(user);
-    const scriptUrl = `${this.publicApiUrl()}/api/v1/public/widget.js`;
-    const previewUrl = `${this.publicApiUrl()}/api/v1/public/widget-preview?account=${encodeURIComponent(account.apiKey ?? "")}`;
+    const scriptUrl = `${this.publicFrontendUrl()}/js/main.js`;
+    const previewUrl = `${this.publicFrontendUrl()}/accessibility-widget`;
     return {
       status: true,
       data: {
@@ -517,10 +517,10 @@ export class CitizenPortalService {
         preview_url: previewUrl,
         embed_code: `<script src="${scriptUrl}" data-account="${account.apiKey ?? ""}" defer></script>`,
         capabilities: [
-          "Text scaling",
-          "High contrast",
-          "Link highlighting",
-          "Keyboard-accessible controls",
+          "Content, font, and spacing adjustments",
+          "Color, contrast, and saturation controls",
+          "Reading guide, mask, and orientation tools",
+          "Persisted per-origin settings and reset",
         ],
       },
     };
@@ -835,6 +835,15 @@ export class CitizenPortalService {
     return this.config
       .get<string>("PUBLIC_API_URL", "http://localhost:4000")
       .replace(/\/+$/, "");
+  }
+
+  private publicFrontendUrl() {
+    const [frontendOrigin = "http://localhost:3000"] = this.config
+      .get<string>("FRONTEND_ORIGINS", "http://localhost:3000")
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+    return frontendOrigin.replace(/\/+$/, "");
   }
 
   private assertCitizen(user: AuthenticatedUser) {

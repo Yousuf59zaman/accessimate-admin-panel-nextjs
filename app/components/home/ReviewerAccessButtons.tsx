@@ -50,6 +50,13 @@ export default function ReviewerAccessButtons() {
           <i className={`fa-solid ${loadingRole === "citizen" ? "fa-spinner animate-spin" : "fa-user"}`} />
           {loadingRole === "citizen" ? "Opening citizen demo…" : "Open citizen demo"}
         </button>
+        <Link
+          href="/accessibility-widget"
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-cyan-300/60 bg-cyan-50 px-5 py-3 text-sm font-bold text-cyan-800 transition hover:-translate-y-0.5 hover:border-cyan-400 hover:bg-cyan-100 dark:border-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-200"
+        >
+          <i className="fa-solid fa-universal-access" />
+          Try the original live widget
+        </Link>
       </div>
       {errorMessage && (
         <p className="mt-3 text-sm font-medium text-rose-600" role="alert">
